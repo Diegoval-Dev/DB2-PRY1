@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,7 @@
     "@types/helmet": "^4.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "helmet": "^8.0.0",
     "neo4j-driver": "^5.28.1"
   }

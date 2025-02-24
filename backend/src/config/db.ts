@@ -5,9 +5,10 @@ dotenv.config();
 
 const driver = neo4j.driver(
   process.env.NEO4J_URI as string,
-  neo4j.auth.basic(process.env.NEO4J_USER as string, process.env.NEO4J_PASSWORD as string)
+  neo4j.auth.basic(process.env.NEO4J_USERNAME as string, process.env.NEO4J_PASSWORD as string),
+  {
+    disableLosslessIntegers: true, 
+  }
 );
 
-const session = driver.session();
-
-export { driver, session };
+export { driver };
