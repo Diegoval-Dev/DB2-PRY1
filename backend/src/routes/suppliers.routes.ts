@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { getAllSuppliers } from "../controllers/suppliers.controller";
+import { getAllSuppliers, getSupplierById, createSupplier, updateSupplier, deleteSupplier } from "../controllers/suppliers.controller";
 
 const router = Router();
 
 router.get("/", getAllSuppliers);
+router.get("/:id", getSupplierById);
+router.post("/", createSupplier);
+router.put("/:id", updateSupplier);
+router.delete("/:id", deleteSupplier);
 
 export default router;
