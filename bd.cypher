@@ -1,138 +1,83 @@
-//Proveedores
-CREATE (:Supplier {ID: "S1", nombre: "Proveedor Central", ubicación: "Guatemala", calificación: 4.5});
-CREATE (:Supplier {ID: "S2", nombre: "Distribuidora Los Andes", ubicación: "Quetzaltenango", calificación: 4.2});
-CREATE (:Supplier {ID: "S3", nombre: "Mayorista El Buen Sabor", ubicación: "Antigua", calificación: 4.7});
-CREATE (:Distributor {ID: "S4", nombre: "Distribuidora Express", ubicación: "Escuintla", calificación: 4.1});
-CREATE (:Wholesaler {ID: "S5", nombre: "Super Mayorista", ubicación: "Ciudad de Guatemala", calificación: 4.8});
-CREATE (:Supplier {ID: "S6", nombre: "Carnes del Norte", ubicación: "Quiché", calificación: 4.3});
-CREATE (:Supplier {ID: "S7", nombre: "Frutas del Trópico", ubicación: "Izabal", calificación: 4.6});
-CREATE (:Distributor {ID: "S8", nombre: "Lácteos Frescos", ubicación: "Chimaltenango", calificación: 4.5});
-CREATE (:Wholesaler {ID: "S9", nombre: "Supermercado Mayorista", ubicación: "Jalapa", calificación: 4.2});
-CREATE (:Supplier {ID: "S10", nombre: "Verduras Selectas", ubicación: "Santa Rosa", calificación: 4.7});
+// =========================
+// Creación de Nodos
+// =========================
+
+// Proveedores: uno mayorista y uno distribuidor
+CREATE (:Supplier:Wholesaler {id: "S001", nombre: "Mayorista Central", ubicación: "Zona Industrial", calificación: 4.5});
+CREATE (:Supplier:Distributor {id: "S002", nombre: "Distribuidora La Esquina", ubicación: "Zona 2", calificación: 4.7});
+
+// Insumos: uno orgánico y uno perecedero
+CREATE (:Ingredient:Organic {id: "I001", nombre: "Lechuga", categoría: "Verdura", precio: 5.0, cantidad_en_existencia: 100, fecha_caducidad: date("2025-04-01")});
+CREATE (:Ingredient:Perishable {id: "I002", nombre: "Carne de res", categoría: "Carnes", precio: 20.0, cantidad_en_existencia: 50, fecha_caducidad: date("2025-03-15")});
+
+// Órdenes de compra: una urgente y una recurrente
+CREATE (:Order:Urgent {id: "O001", fecha_orden: date("2025-02-26"), cantidad: 30, estado: "pendiente", costo_total: 150.0});
+CREATE (:Order:Recurrent {id: "O002", fecha_orden: date("2025-02-25"), cantidad: 50, estado: "completada", costo_total: 300.0});
+
+// Inventarios: uno de frío y uno seco
+CREATE (:Inventory:ColdStorage {id: "INV001", ubicación: "Bodega Central", capacidad: 500, cantidad_insumos: 200});
+CREATE (:Inventory:DryStorage {id: "INV002", ubicación: "Almacén Seco", capacidad: 1000, cantidad_insumos: 800});
+
+// Ubicaciones: una bodega y un restaurante
+CREATE (:Location:Warehouse {id: "L001", nombre: "Bodega Central", tipo_ubicacion: "Warehouse"});
+CREATE (:Location:Restaurant {id: "L002", nombre: "Restaurante El Sabor", tipo_ubicacion: "Restaurant"});
+
+// Ruta refrigerada que conecta bodega y restaurante
+CREATE (:Route:Refrigerated:Express {id: "R001", origen: "Bodega Central", destino: "Restaurante El Sabor", distancia: 15.5, tipo_transporte: "Refrigerated"});
+
+// Categorías para los insumos
+CREATE (:Category {id: "CAT001", nombre: "Verdura"});
+CREATE (:Category {id: "CAT002", nombre: "Carnes"});
 
 
-//Insumos
-CREATE (:Ingredient:Perishable {ID: "I1", nombre: "Carne de Res", categoría: "Carnes", precio: 50.0, cantidad: 500, fechaCaducidad: date("2025-05-01")});
-CREATE (:Ingredient:Perishable {ID: "I2", nombre: "Leche", categoría: "Lácteos", precio: 10.0, cantidad: 200, fechaCaducidad: date("2025-03-20")});
-CREATE (:Ingredient:Organic {ID: "I3", nombre: "Espinaca", categoría: "Verduras", precio: 5.0, cantidad: 300, fechaCaducidad: date("2025-03-15")});
-CREATE (:Ingredient {ID: "I4", nombre: "Harina", categoría: "Panadería", precio: 8.0, cantidad: 1000});
-CREATE (:Ingredient {ID: "I5", nombre: "Azúcar", categoría: "Endulzantes", precio: 7.0, cantidad: 600});
-CREATE (:Ingredient:Perishable {ID: "I6", nombre: "Pollo", categoría: "Carnes", precio: 45.0, cantidad: 600, fechaCaducidad: date("2025-06-10")});
-CREATE (:Ingredient:Perishable {ID: "I7", nombre: "Queso", categoría: "Lácteos", precio: 20.0, cantidad: 300, fechaCaducidad: date("2025-04-15")});
-CREATE (:Ingredient:Organic {ID: "I8", nombre: "Tomates", categoría: "Verduras", precio: 4.0, cantidad: 400, fechaCaducidad: date("2025-03-25")});
-CREATE (:Ingredient {ID: "I9", nombre: "Arroz", categoría: "Cereales", precio: 12.0, cantidad: 800});
-CREATE (:Ingredient {ID: "I10", nombre: "Sal", categoría: "Condimentos", precio: 5.0, cantidad: 1000});
+// =========================
+// Creación de Relaciones
+// =========================
 
+// SUPPLIES: (Supplier:Wholesaler) suministra (Ingredient:Organic)
+MATCH (s:Supplier {id:"S001"}), (i:Ingredient {id:"I001"})
+CREATE (s)-[:SUPPLIES {cantidad: 100, fecha: date("2025-02-26")}]->(i);
 
-//Ordenes de compra
-CREATE (:Order:Urgent {ID: "O1", fechaOrden: date("2025-02-20"), cantidad: 100, estado: "Pendiente", costoTotal: 5000.0});
-CREATE (:Order:Recurrent {ID: "O2", fechaOrden: date("2025-02-15"), cantidad: 50, estado: "Completado", costoTotal: 2500.0});
-CREATE (:Order {ID: "O3", fechaOrden: date("2025-02-22"), cantidad: 75, estado: "Enviado", costoTotal: 3750.0});
-CREATE (:Order:Urgent {ID: "O4", fechaOrden: date("2025-02-25"), cantidad: 200, estado: "Pendiente", costoTotal: 10000.0});
-CREATE (:Order:Recurrent {ID: "O5", fechaOrden: date("2025-02-18"), cantidad: 90, estado: "Enviado", costoTotal: 4500.0});
-CREATE (:Order {ID: "O6", fechaOrden: date("2025-02-28"), cantidad: 120, estado: "Completado", costoTotal: 6000.0});
+// STORED_IN: (Ingredient:Perishable) se almacena en (Inventory:ColdStorage)
+MATCH (i:Ingredient {id:"I002"}), (inv:Inventory {id:"INV001"})
+CREATE (i)-[:STORED_IN {cantidad: 50}]->(inv);
 
+// LOCATED_IN: Inventarios ubicados en Ubicaciones
+MATCH (inv:Inventory {id:"INV001"}), (loc:Location {id:"L001"})
+CREATE (inv)-[:LOCATED_IN {ciudad: "Ciudad Central"}]->(loc);
+MATCH (inv:Inventory {id:"INV002"}), (loc:Location {id:"L002"})
+CREATE (inv)-[:LOCATED_IN {ciudad: "Ciudad Sabrosa"}]->(loc);
 
-//Inventarios
-CREATE (:Inventory:ColdStorage {ID: "INV1", ubicación: "Bodega Central", capacidad: 1000, cantidadAlmacenada: 700});
-CREATE (:Inventory:DryStorage {ID: "INV2", ubicación: "Almacén Zona 10", capacidad: 500, cantidadAlmacenada: 300});
-CREATE (:Inventory:ColdStorage {ID: "INV3", ubicación: "Bodega Norte", capacidad: 1500, cantidadAlmacenada: 900});
-CREATE (:Inventory:DryStorage {ID: "INV4", ubicación: "Almacén Zona 15", capacidad: 700, cantidadAlmacenada: 500});
-
-
-//Ubicaciones
-CREATE (:Location:Warehouse {ID: "LOC1", nombre: "Bodega Central", tipo: "Bodega"});
-CREATE (:Location:Restaurant {ID: "LOC2", nombre: "Restaurante El Buen Gusto", tipo: "Restaurante"});
-CREATE (:Location:Warehouse {ID: "LOC3", nombre: "Bodega Norte", tipo: "Bodega"});
-CREATE (:Location:Restaurant {ID: "LOC4", nombre: "Restaurante Delicias", tipo: "Restaurante"});
-
-
-//Rutas
-CREATE (:Route:Refrigerated {ID: "R1", origen: "Bodega Central", destino: "Restaurante El Buen Gusto", distancia: 15.0, tipo: "Refrigerado"});
-CREATE (:Route:Express {ID: "R2", origen: "Bodega Central", destino: "Almacén Zona 10", distancia: 10.0, tipo: "Express"});
-CREATE (:Route:Refrigerated {ID: "R3", origen: "Bodega Norte", destino: "Restaurante Delicias", distancia: 20.0, tipo: "Refrigerado"});
-CREATE (:Route:Express {ID: "R4", origen: "Bodega Norte", destino: "Almacén Zona 15", distancia: 12.0, tipo: "Express"});
-
-
-//Relación de Proveedores e Insumos
-MATCH (s:Supplier {ID: "S1"}), (i:Ingredient {ID: "I1"})
-CREATE (s)-[:SUPPLIES {cantidad: 100, fecha: date("2025-02-10")}]->(i);
-
-MATCH (s:Distributor {ID: "S4"}), (i:Ingredient:Perishable {ID: "I2"})
-CREATE (s)-[:SUPPLIES {cantidad: 200, fecha: date("2025-02-12")}]->(i);
-
-MATCH (s:Supplier {ID: "S6"}), (i:Ingredient {ID: "I6"})
-CREATE (s)-[:SUPPLIES {cantidad: 150, fecha: date("2025-02-15")}]->(i);
-
-MATCH (s:Distributor {ID: "S8"}), (i:Ingredient:Perishable {ID: "I7"})
-CREATE (s)-[:SUPPLIES {cantidad: 250, fecha: date("2025-02-17")}]->(i);
-
-
-
-//Relación de Insumos con Inventarios
-MATCH (i:Ingredient {ID: "I1"}), (inv:Inventory:ColdStorage {ID: "INV1"})
-CREATE (i)-[:STORED_IN {cantidad: 80}]->(inv);
-
-MATCH (i:Ingredient {ID: "I5"}), (inv:Inventory:DryStorage {ID: "INV2"})
-CREATE (i)-[:STORED_IN {cantidad: 150}]->(inv);
-
-MATCH (i:Ingredient {ID: "I8"}), (inv:Inventory:ColdStorage {ID: "INV3"})
-CREATE (i)-[:STORED_IN {cantidad: 120}]->(inv);
-
-MATCH (i:Ingredient {ID: "I9"}), (inv:Inventory:DryStorage {ID: "INV4"})
-CREATE (i)-[:STORED_IN {cantidad: 300}]->(inv);
-
-
-//Relación de Órdenes e Insumos
-MATCH (o:Order:Urgent {ID: "O1"}), (i:Ingredient {ID: "I1"})
-CREATE (o)-[:CONTAINS {cantidad: 50}]->(i);
-
-MATCH (o:Order:Recurrent {ID: "O2"}), (i:Ingredient {ID: "I3"})
+// CONTAINS: (Order:Urgent) contiene (Ingredient)
+MATCH (o:Order {id:"O001"}), (i:Ingredient {id:"I001"})
 CREATE (o)-[:CONTAINS {cantidad: 30}]->(i);
 
-MATCH (o:Order:Urgent {ID: "O4"}), (i:Ingredient {ID: "I6"})
-CREATE (o)-[:CONTAINS {cantidad: 70}]->(i);
+// SHIPPED_BY: (Order:Recurrent) es enviado por (Supplier:Distributor)
+MATCH (o:Order {id:"O002"}), (s:Supplier {id:"S002"})
+CREATE (o)-[:SHIPPED_BY {fecha: date("2025-02-25"), costo: 300.0}]->(s);
 
-MATCH (o:Order:Recurrent {ID: "O5"}), (i:Ingredient {ID: "I8"})
-CREATE (o)-[:CONTAINS {cantidad: 40}]->(i);
+// DELIVERED_TO: (Order) es entregado a (Inventory:DryStorage)
+MATCH (o:Order {id:"O002"}), (inv:Inventory {id:"INV002"})
+CREATE (o)-[:DELIVERED_TO {fecha: date("2025-02-26")}]->(inv);
 
+// CONNECTS: La ruta conecta ambas ubicaciones (bodega y restaurante)
+MATCH (r:Route {id:"R001"}), (loc:Location {id:"L001"})
+CREATE (r)-[:CONNECTS {distancia: 15.5, tipo: "Directo"}]->(loc);
+MATCH (r:Route {id:"R001"}), (loc:Location {id:"L002"})
+CREATE (r)-[:CONNECTS {distancia: 15.5, tipo: "Directo"}]->(loc);
 
-// Relación de Órdenes con Proveedores
-MATCH (o:Order {ID: "O1"}), (s:Supplier {ID: "S1"})
-CREATE (s)-[:HAS_ORDER {estado: "Pendiente"}]->(o);
+// HAS_ORDER: Proveedores con sus órdenes
+MATCH (s:Supplier {id:"S001"}), (o:Order {id:"O001"})
+CREATE (s)-[:HAS_ORDER {estado: "pendiente"}]->(o);
+MATCH (s:Supplier {id:"S002"}), (o:Order {id:"O002"})
+CREATE (s)-[:HAS_ORDER {estado: "completada"}]->(o);
 
-MATCH (o:Order {ID: "O2"}), (s:Distributor {ID: "S4"})
-CREATE (s)-[:HAS_ORDER {estado: "Completado"}]->(o);
+// BELONGS_TO: Insumos pertenecen a su categoría
+MATCH (i:Ingredient {id:"I001"}), (c:Category {id:"CAT001"})
+CREATE (i)-[:BELONGS_TO {categoría: "Verdura"}]->(c);
+MATCH (i:Ingredient {id:"I002"}), (c:Category {id:"CAT002"})
+CREATE (i)-[:BELONGS_TO {categoría: "Carnes"}]->(c);
 
-MATCH (o:Order {ID: "O4"}), (s:Supplier {ID: "S6"})
-CREATE (s)-[:HAS_ORDER {estado: "Pendiente"}]->(o);
-
-MATCH (o:Order {ID: "O5"}), (s:Distributor {ID: "S8"})
-CREATE (s)-[:HAS_ORDER {estado: "Enviado"}]->(o);
-
-
-
-//Relación de Inventarios con Ubicaciones
-MATCH (inv:Inventory {ID: "INV1"}), (loc:Location {ID: "LOC1"})
-CREATE (inv)-[:LOCATED_IN {ciudad: "Guatemala"}]->(loc);
-
-MATCH (inv:Inventory {ID: "INV2"}), (loc:Location {ID: "LOC2"})
-CREATE (inv)-[:LOCATED_IN {ciudad: "Guatemala"}]->(loc);
-
-MATCH (inv:Inventory {ID: "INV3"}), (loc:Location {ID: "LOC3"})
-CREATE (inv)-[:LOCATED_IN {ciudad: "Quiché"}]->(loc);
-
-MATCH (inv:Inventory {ID: "INV4"}), (loc:Location {ID: "LOC4"})
-CREATE (inv)-[:LOCATED_IN {ciudad: "Guatemala"}]->(loc);
-
-
-//Relación de Rutas de Transporte
-MATCH (r:Route {ID: "R1"}), (loc1:Location {ID: "LOC1"}), (loc2:Location {ID: "LOC2"})
-CREATE (r)-[:CONNECTS {distancia: 15.0, tipo: "Refrigerado"}]->(loc1),
-       (r)-[:CONNECTS {distancia: 15.0, tipo: "Refrigerado"}]->(loc2);
-
-MATCH (r:Route {ID: "R3"}), (loc1:Location {ID: "LOC3"}), (loc2:Location {ID: "LOC4"})
-CREATE (r)-[:CONNECTS {distancia: 20.0, tipo: "Refrigerado"}]->(loc1),
-       (r)-[:CONNECTS {distancia: 20.0, tipo: "Refrigerado"}]->(loc2);
-
-
+// PARTNERS_WITH: Relación de alianza entre proveedores
+MATCH (s1:Supplier {id:"S001"}), (s2:Supplier {id:"S002"})
+CREATE (s1)-[:PARTNERS_WITH {desde: date("2025-01-01")}]->(s2);
