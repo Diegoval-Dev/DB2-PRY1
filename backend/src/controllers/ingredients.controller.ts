@@ -2,19 +2,40 @@ import { NextFunction, Request, Response } from "express";
 import { driver } from "../config/db";
 
 export const getAllIngredients = async (req: Request, res: Response) => {
-  const session = driver.session();
+  const session = driver.session()
+
   try {
-    const result = await session.run(`MATCH (i:Ingredient) RETURN i`);
-    const ingredients = result.records.map(record => record.get("i").properties);
-    res.json(ingredients);
+    const result = await session.run(`
+      MATCH (i)
+      WHERE i:Ingredient OR i:Perishable OR i:Organic
+      RETURN i, labels(i) AS labels
+    `)
+
+    const ingredients = result.records.map(record => {
+      const properties = record.get("i").properties
+      const labels = record.get("labels")
+
+      const tipo: string[] = labels.filter((label: string) => ["Ingredient", "Perishable", "Organic"].includes(label))
+
+      return {
+        id: properties.id,
+        nombre: properties.nombre,
+        categoria: properties.categoría,
+        precio: properties.precio,
+        cantidad: properties.cantidad_en_existencia,
+        fechaCaducidad: properties.fecha_caducidad,
+        tipo
+      }
+    })
+
+    res.json(ingredients)
   } catch (error) {
-    res.status(500).json({ error: "Error obteniendo ingredientes" });
+    console.error("Error obteniendo ingredientes:", error)
+    res.status(500).json({ error: "Error obteniendo ingredientes" })
   } finally {
-    await session.close();
+    await session.close()
   }
-};
-
-
+}
 export const getIngredientById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const session = driver.session();
   try {

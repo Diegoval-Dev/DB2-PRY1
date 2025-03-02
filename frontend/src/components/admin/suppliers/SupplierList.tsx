@@ -1,16 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchSuppliers } from "@api/admin/suppliersApi";
-import { Supplier } from "@interfaces/admin/SupplierTypes";
+import { Supplier } from "@interfaces/admin/SupplierTypes"
 
+interface Props {
+  suppliers: Supplier[]
+  isLoading: boolean
+  error: unknown
+}
 
-const SupplierList = () => {
-  const { data: suppliers = [], isLoading, error } = useQuery<Supplier[]>({
-    queryKey: ["suppliers"],
-    queryFn: fetchSuppliers,
-  });
-
-  if (isLoading) return <p>Cargando proveedores...</p>;
-  if (error) return <p>Error cargando proveedores.</p>;
+const SupplierList = ({ suppliers, isLoading, error }: Props) => {
+  if (isLoading) return <p>Cargando proveedores...</p>
+  if (error) return <p>Error cargando proveedores.</p>
 
   return (
     <div>
@@ -18,12 +16,12 @@ const SupplierList = () => {
       <ul>
         {suppliers.map((supplier) => (
           <li key={supplier.ID}>
-            {supplier.name} - {supplier.location} (Calificacion: {supplier.rating})
+            {supplier.name} - {supplier.location} (Calificacion: {supplier.rating}) - Tipo: {supplier.type}
           </li>
         ))}
       </ul>
     </div>
-  );
-};
+  )
+}
 
-export default SupplierList;
+export default SupplierList

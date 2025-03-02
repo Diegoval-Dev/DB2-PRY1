@@ -2,18 +2,39 @@ import { Request, Response } from "express";
 import { driver } from "../config/db";
 
 export const getAllSuppliers = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
+  const session = driver.session()
+
   try {
-    const result = await session.run(`MATCH (s:Supplier) RETURN s`);
-    const suppliers = result.records.map(record => record.get("s").properties);
-    res.json(suppliers);
+    const result = await session.run(`
+      MATCH (s)
+      WHERE s:Supplier OR s:Distributor OR s:Wholesaler
+      RETURN s, labels(s) AS labels
+    `)
+
+    const suppliers = result.records.map(record => {
+      const properties = record.get("s").properties
+      const labels: string[] = record.get("labels")
+
+      // Filtramos solo las etiquetas validas como tipo
+      const tiposValidos = labels.filter(label => ["Supplier", "Distributor", "Wholesaler"].includes(label))
+
+      return {
+        id: properties.id,
+        ubicación: properties.ubicación,
+        nombre: properties.nombre,
+        calificación: properties.calificación,
+        tipo: tiposValidos
+      }
+    })
+
+    res.json(suppliers)
   } catch (error) {
-    console.error("Error obteniendo proveedores:", error);
-    res.status(500).json({ error: "Error obteniendo proveedores" });
+    console.error("Error obteniendo proveedores:", error)
+    res.status(500).json({ error: "Error obteniendo proveedores" })
   } finally {
-    await session.close();
+    await session.close()
   }
-};
+}
 
 export const getSupplierById = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session();
