@@ -1,30 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchIngredients } from "@api/admin/ingredientsApi";
-import { Ingredient } from "@interfaces/admin/IngredientTypes";
+import { Ingredient } from "@interfaces/admin/IngredientTypes"
 
-const IngredientList = () => {
-  const {
-    data: ingredients = [],
-    isLoading,
-    error,
-  } = useQuery<Ingredient[]>({
-    queryKey: ["ingredients"],
-    queryFn: fetchIngredients,
-  });
+interface Props {
+  ingredients: Ingredient[]
+  isLoading: boolean
+  error: unknown
+}
 
-  if (isLoading) return <p>Cargando insumos...</p>;
-  if (error) return <p>Error cargando insumos.</p>;
+const IngredientList = ({ ingredients, isLoading, error }: Props) => {
+  if (isLoading) return <p>Cargando ingredientes...</p>
+  if (error) return <p>Error cargando ingredientes.</p>
 
   return (
     <ul>
-      {ingredients.map((ingredient) => (
+      {ingredients.map(ingredient => (
         <li key={ingredient.ID}>
-          {ingredient.name} - {ingredient.category} (Cantidad:{" "}
-          {ingredient.quantity}) - Expira: {ingredient.expirationDate}
+          {ingredient.name} - {ingredient.category} - Q{ingredient.price} ({ingredient.quantity} en existencia) - Tipos: {ingredient.type.join(", ")}
         </li>
       ))}
     </ul>
-  );
-};
+  )
+}
 
-export default IngredientList;
+export default IngredientList

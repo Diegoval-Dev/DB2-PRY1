@@ -16,7 +16,7 @@ const SupplierList = ({ suppliers, isLoading, error }: Props) => {
       <ul>
         {suppliers.map((supplier) => (
           <li key={supplier.ID}>
-            {supplier.name} - {supplier.location} (Calificacion: {supplier.rating}) - Tipo: {supplier.type}
+            {supplier.name} - {supplier.location} (Calificacion: {supplier.rating}) - Tipo: {supplier.type.join(", ")}
           </li>
         ))}
       </ul>

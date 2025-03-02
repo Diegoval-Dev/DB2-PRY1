@@ -1,17 +1,22 @@
+export type IngredientType = "Ingredient" | "Perishable" | "Organic"
+
 export interface Ingredient {
   ID: string
   name: string
   category: string
   price: number
   quantity: number
-  expirationDate: string 
+  expirationDate: string
+  type: IngredientType[]
 }
 
-export interface IngredientResonse {
+// El que devuelve el 
+export interface IngredientResponse {
   id: string
-  precio: number
-  cantidad_en_existencia: number
-  categoría: string
   nombre: string
-  fecha_caducidad: string
+  categoria: string
+  precio: number
+  cantidad: number
+  fechaCaducidad: string
+  tipo: IngredientType[]
 }

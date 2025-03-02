@@ -1,30 +1,42 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createIngredient } from "@api/admin/ingredientsApi";
-import { Ingredient } from "@interfaces/admin/IngredientTypes";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { ingredientSchema } from "@validations/admin/ingredientSchema";
+import { useMutation } from "@tanstack/react-query"
+import { createIngredient } from "@api/admin/ingredientsApi"
+import { Ingredient, IngredientType } from "@interfaces/admin/IngredientTypes"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { ingredientSchema } from "@validations/admin/ingredientSchema"
 
-const IngredientForm = () => {
-  const queryClient = useQueryClient();
+interface Props {
+  refetch: () => void
+}
 
+interface IngredientFormData {
+  ID: string
+  name: string
+  category: string
+  price: number
+  quantity: number
+  expirationDate: string
+  type: (string | undefined)[]
+}
+
+const IngredientForm = ({ refetch }: Props) => {
   const mutation = useMutation({
     mutationFn: createIngredient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ingredients"] });
-      reset();
+      refetch()
+      reset()
     },
     onError: () => {
-      alert("Error al crear insumo");
-    },
-  });
+      alert("Error al crear insumo")
+    }
+  })
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
-  } = useForm<Ingredient>({
+    formState: { errors }
+  } = useForm<IngredientFormData>({
     resolver: yupResolver(ingredientSchema),
     defaultValues: {
       ID: "",
@@ -33,12 +45,18 @@ const IngredientForm = () => {
       price: 0,
       quantity: 0,
       expirationDate: "",
-    },
-  });
+      type: []
+    }
+  })
 
-  const onSubmit = (data: Ingredient) => {
-    mutation.mutate(data);
-  };
+  const onSubmit = (data: IngredientFormData) => {
+    const adaptedData: Ingredient = {
+      ...data,
+      type: data.type as IngredientType[]
+    }
+
+    mutation.mutate(adaptedData)
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -57,18 +75,17 @@ const IngredientForm = () => {
       <input type="number" placeholder="Cantidad" {...register("quantity")} />
       <p>{errors.quantity?.message}</p>
 
-      <input
-        type="date"
-        placeholder="Fecha de caducidad"
-        {...register("expirationDate")}
-      />
+      <input type="date" placeholder="Fecha de Caducidad" {...register("expirationDate")} />
       <p>{errors.expirationDate?.message}</p>
 
-      <button type="submit" disabled={mutation.isPending}>
-        Guardar Insumo
-      </button>
-    </form>
-  );
-};
+      <label><input type="checkbox" value="Ingredient" {...register("type")} /> Ingredient</label>
+      <label><input type="checkbox" value="Perishable" {...register("type")} /> Perishable</label>
+      <label><input type="checkbox" value="Organic" {...register("type")} /> Organic</label>
+      <p>{errors.type?.message}</p>
 
-export default IngredientForm;
+      <button type="submit" disabled={mutation.isPending}>Guardar Insumo</button>
+    </form>
+  )
+}
+
+export default IngredientForm
