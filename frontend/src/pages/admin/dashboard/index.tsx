@@ -1,29 +1,14 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import DashboardSummary from "@components/admin/dashboard/DashboardSummary"
+import DashboardChart from "@components/admin/dashboard/DashboardChart"
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const Suppliers = () => {
-  const [suppliers, setSuppliers] = useState([]);
-
-  useEffect(() => {
-    axios.get(`${API_URL}/suppliers`)
-      .then(response => setSuppliers(response.data))
-      .catch(error => console.error("Error cargando proveedores:", error));
-  }, []);
-
+const AdminDashboard = () => {
   return (
     <div>
-      <h1>Proveedores</h1>
-      <ul>
-        {suppliers.map((supplier: any) => (
-          <li key={supplier.ID}>
-            {supplier.nombre} - {supplier.ubicación} (Calificación: {supplier.calificación})
-          </li>
-        ))}
-      </ul>
+      <h1>Dashboard - Administrador</h1>
+      <DashboardSummary />
+      <DashboardChart />
     </div>
-  );
-};
+  )
+}
 
-export default Suppliers;
+export default AdminDashboard

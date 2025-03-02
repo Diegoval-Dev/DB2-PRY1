@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchSuppliers } from "@api/admin/suppliers/suppliersApi";
+import { fetchSuppliers } from "@api/admin/suppliersApi";
 import { Supplier } from "@interfaces/admin/SupplierTypes";
 
 

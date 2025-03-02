@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchDashboardSummary } from "@api/admin/dashboard/dashboardApi"
+import { fetchDashboardSummary } from "@api/admin/dashboardApi"
 import { DashboardSummaryItem } from "@interfaces/admin/DashboardTypes"
 
 const DashboardSummary = () => {
