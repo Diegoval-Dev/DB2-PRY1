@@ -4,7 +4,7 @@ import { Inventory, InventoryResponse } from "@interfaces/admin/InventoryTypes"
 const API_URL = import.meta.env.VITE_API_URL
 
 export const fetchInventories = async (): Promise<Inventory[]> => {
-  const response = await axios.get<InventoryResponse[]>(`${API_URL}/inventories`)
+  const response = await axios.get<InventoryResponse[]>(`${API_URL}/inventory`)
 
   return response.data.map(inventory => ({
     ID: inventory.id,
@@ -17,7 +17,7 @@ export const fetchInventories = async (): Promise<Inventory[]> => {
 }
 
 export const createInventory = async (inventory: Inventory): Promise<void> => {
-  await axios.post(`${API_URL}/inventories`, {
+  await axios.post(`${API_URL}/inventory`, {
     id: inventory.ID,
     ubicacion: inventory.location,
     capacidad: inventory.capacity,
