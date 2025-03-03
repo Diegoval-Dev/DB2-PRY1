@@ -1,15 +1,22 @@
+export type OrderType = "Order" | "Urgent" | "Recurrent"
+
+export type OrderStatus = "pendiente" | "completada" | "cancelada"
+
 export interface Order {
   ID: string
-  orderDate: string // ISO Date string
+  date: string
+  total: number
   quantity: number
-  status: "pendiente" | "enviada" | "completada";
-  totalCost: number
+  status: OrderStatus
+  type: OrderType[]
 }
 
+// Este es el tipo que devuelve el backend, en español
 export interface OrderResponse {
-  costo_total: number
-  estado: "pendiente" | "enviada" | "completada"
   id: string
+  fecha: string
+  total: number
   cantidad: number
-  fecha_orden: string
+  estado: OrderStatus
+  tipo: OrderType[]
 }
