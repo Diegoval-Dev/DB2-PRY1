@@ -55,12 +55,21 @@ export const getSupplierById = async (req: Request, res: Response): Promise<void
 
 export const createSupplier = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session();
-  const { ID, nombre, ubicación, calificación } = req.body;
+  const { id, nombre, ubicación, calificación, tipo } = req.body;
+
+  if (!Array.isArray(tipo) || tipo.length === 0) {
+    res.status(400).json({ error: "Debe especificar al menos un tipo" });
+    return;
+  }
+
+  const labels = tipo.map(t => `\`${t}\``).join(":"); // Ejemplo: `Supplier`:`Distributor`
+
+  const query = `
+    CREATE (s:${labels} {id: $id, nombre: $nombre, ubicación: $ubicación, calificación: $calificación})
+  `;
+
   try {
-    await session.run(
-      `CREATE (:Supplier {ID: $ID, nombre: $nombre, ubicación: $ubicación, calificación: $calificación})`,
-      { ID, nombre, ubicación, calificación }
-    );
+    await session.run(query, { id, nombre, ubicación, calificación });
     res.json({ message: "Proveedor creado" });
   } catch (error) {
     console.error("Error creando proveedor:", error);
@@ -69,6 +78,7 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
     await session.close();
   }
 };
+
 
 export const updateSupplier = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session();

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Supplier, SupplierResponse } from "@interfaces/admin/SupplierTypes";
+import { Supplier, SupplierResponse, SupplierCreate } from "@interfaces/admin/SupplierTypes";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,11 +15,12 @@ export const fetchSuppliers = async (): Promise<Supplier[]> => {
 }
 
 
-export const createSupplier = async (supplier: Supplier): Promise<void> => {
+export const createSupplier = async (supplier: SupplierCreate): Promise<void> => {
   await axios.post(`${API_URL}/suppliers`, {
-    ID: supplier.ID,
-    nombre: supplier.name,
-    ubicacion: supplier.location,
-    calificacion: supplier.rating
+    id: supplier.id,
+    nombre: supplier.nombre,
+    ubicación: supplier.ubicación,
+    calificación: supplier.calificación,
+    tipo: supplier.tipo
   })
 }

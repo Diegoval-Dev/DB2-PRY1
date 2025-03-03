@@ -8,6 +8,15 @@ export interface Supplier {
   type: SupplierType[]
 }
 
+export interface SupplierCreate {
+  id: string
+  nombre: string
+  ubicación: string
+  calificación: number
+  tipo: SupplierType[]
+}
+
+
 export interface SupplierResponse {
   id: string;
   ubicación: string;

@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query"
 import { createSupplier } from "@api/admin/suppliersApi"
-import { Supplier, SupplierType } from "@interfaces/admin/SupplierTypes"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { supplierSchema } from "@validations/admin/supplierSchema"
+import { SupplierType } from "@interfaces/admin/SupplierTypes"
 
 export interface SupplierFormData {
   ID: string
@@ -47,13 +47,15 @@ const SupplierForm = ({ refetch }: Props) => {
   })
 
   const onSubmit = (data: SupplierFormData) => {
-    const adaptedData: Supplier = {
-      ...data,
-      type: data.type as SupplierType[] // adaptamos al tipo estricto
-    }
+    mutation.mutate({
+        id: data.ID,
+        nombre: data.name,
+        ubicación: data.location,
+        calificación: data.rating,
+        tipo: data.type.filter((t): t is SupplierType => t === "Supplier" || t === "Distributor" || t === "Wholesaler")
+    })
+}
 
-    mutation.mutate(adaptedData)
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
