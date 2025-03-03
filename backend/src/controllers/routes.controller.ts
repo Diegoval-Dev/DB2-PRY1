@@ -1,51 +1,52 @@
 import { Request, Response } from "express";
 import { driver } from "../config/db";
 
-export const getAllRoutes = async (req: Request, res: Response): Promise<void> => {
+export const createRoute = async (req: Request, res: Response) => {
   const session = driver.session();
+  const { id, origen, destino, distancia, tipoTransporte } = req.body;
+
   try {
-    const result = await session.run(`MATCH (r:Route) RETURN r`);
-    const routes = result.records.map(record => record.get("r").properties);
-    res.json(routes);
+      const query = `
+          MATCH (o:Location {id: $origen})
+          MATCH (d:Location {id: $destino})
+          CREATE (r:Route {id: $id, distancia: toFloat($distancia), tipoTransporte: $tipoTransporte})
+          CREATE (r)-[:CONNECTS]->(o)
+          CREATE (r)-[:CONNECTS]->(d)
+      `;
+      await session.run(query, { id, origen, destino, distancia, tipoTransporte });
+      res.json({ message: "Ruta creada correctamente" });
   } catch (error) {
-    console.error("Error obteniendo rutas:", error);
-    res.status(500).json({ error: "Error obteniendo rutas" });
+      console.error("Error creando ruta:", error);
+      res.status(500).json({ error: "Error creando ruta" });
   } finally {
-    await session.close();
+      await session.close();
   }
 };
 
-export const getRouteById = async (req: Request, res: Response): Promise<void> => {
+export const getAllRoutes = async (req: Request, res: Response) => {
   const session = driver.session();
-  try {
-    const result = await session.run(`MATCH (r:Route {ID: $id}) RETURN r`, { id: req.params.id });
-    if (result.records.length === 0) {
-      res.status(404).json({ error: "Ruta no encontrada" });
-      return;
-    }
-    res.json(result.records[0].get("r").properties);
-  } catch (error) {
-    console.error("Error obteniendo ruta:", error);
-    res.status(500).json({ error: "Error obteniendo ruta" });
-  } finally {
-    await session.close();
-  }
-};
 
-export const createRoute = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
-  const { ID, origen, destino, distancia, tipo } = req.body;
   try {
-    await session.run(
-      `CREATE (:Route {ID: $ID, origen: $origen, destino: $destino, distancia: $distancia, tipo: $tipo})`,
-      { ID, origen, destino, distancia, tipo }
-    );
-    res.json({ message: "Ruta creada" });
+      const query = `
+          MATCH (r:Route)-[:CONNECTS]->(o:Location), (r)-[:CONNECTS]->(d:Location)
+          RETURN r.id AS id, o.nombre AS origen, d.nombre AS destino, r.distancia AS distancia, r.tipoTransporte AS tipoTransporte
+      `;
+      const result = await session.run(query);
+
+      const routes = result.records.map(record => ({
+          id: record.get("id"),
+          origen: record.get("origen"),
+          destino: record.get("destino"),
+          distancia: record.get("distancia"),
+          tipoTransporte: record.get("tipoTransporte")
+      }));
+
+      res.json(routes);
   } catch (error) {
-    console.error("Error creando ruta:", error);
-    res.status(500).json({ error: "Error creando ruta" });
+      console.error("Error obteniendo rutas:", error);
+      res.status(500).json({ error: "Error obteniendo rutas" });
   } finally {
-    await session.close();
+      await session.close();
   }
 };
 

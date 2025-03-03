@@ -7,6 +7,7 @@ import supplierRoutes from "./routes/suppliers.routes";
 import ingredientRoutes from "./routes/ingredients.routes";
 import orderRoutes from "./routes/orders.routes";
 import inventoryRoutes from "./routes/inventory.routes";
+import locationsRoutes from "./routes/locations.routes";
 
 dotenv.config();
 
@@ -19,5 +20,6 @@ app.use("/api/suppliers", supplierRoutes);
 app.use("/api/ingredients", ingredientRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/inventory", inventoryRoutes);
+app.use("/api/locations", locationsRoutes);
 
 export default app;

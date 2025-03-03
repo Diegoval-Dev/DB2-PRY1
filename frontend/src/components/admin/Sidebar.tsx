@@ -10,6 +10,7 @@ const Sidebar = () => {
         <li><Link to="/admin/ingredients">Insumos</Link></li>
         <li><Link to="/admin/orders">Ordenes</Link></li>
         <li><Link to="/admin/inventory">Inventario</Link></li>
+        <li><Link to="/admin/locations">Ubicaciones</Link></li>
         <li><a href="/">Salir al sitio publico</a></li>
       </ul>
     </nav>
