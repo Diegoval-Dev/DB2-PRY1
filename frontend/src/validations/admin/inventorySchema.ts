@@ -1,8 +1,11 @@
 import * as yup from "yup"
 
-export const inventorySchema = yup.object({
-  ID: yup.string().required("ID es requerido"),
-  location: yup.string().required("Ubicacion es requerida"),
-  capacity: yup.number().min(1, "Capacidad minima es 1").required("Capacidad es requerida"),
-  storedQuantity: yup.number().min(0, "Cantidad almacenada no puede ser negativa").required("Cantidad almacenada es requerida")
+
+export const inventorySchema = yup.object().shape({
+  ID: yup.string().required("ID is required"),
+  location: yup.string().required("Location is required"),
+  capacity: yup.number().required("Capacity is required"),
+  supplyQuantity: yup.number().required("Supply Quantity is required"),
+  storedQuantity: yup.number().required("Stored Quantity is required"),
+  type: yup.array().of(yup.string().oneOf(["Inventory", "ColdStorage", "DryStorage"])).required("Type is required")
 })

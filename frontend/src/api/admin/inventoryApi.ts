@@ -1,30 +1,27 @@
 import axios from "axios"
-import { Inventory } from "@interfaces/admin/InventoryTypes"
+import { Inventory, InventoryResponse } from "@interfaces/admin/InventoryTypes"
 
 const API_URL = import.meta.env.VITE_API_URL
 
-interface InventoryApiResponse {
-  ID: string
-  ubicacion: string
-  capacidad: number
-  cantidadAlmacenada: number
-}
+export const fetchInventories = async (): Promise<Inventory[]> => {
+  const response = await axios.get<InventoryResponse[]>(`${API_URL}/inventories`)
 
-export const fetchInventory = async (): Promise<Inventory[]> => {
-  const response = await axios.get<InventoryApiResponse[]>(`${API_URL}/inventory`)
-  return response.data.map((item) => ({
-    ID: item.ID,
-    location: item.ubicacion,
-    capacity: item.capacidad,
-    storedQuantity: item.cantidadAlmacenada
+  return response.data.map(inventory => ({
+    ID: inventory.id,
+    location: inventory.ubicacion,
+    capacity: inventory.capacidad,
+    supplyQuantity: inventory.cantidadInsumo,
+    storedQuantity: inventory.capacidad, 
+    type: inventory.tipo
   }))
 }
 
 export const createInventory = async (inventory: Inventory): Promise<void> => {
-  await axios.post(`${API_URL}/inventory`, {
-    ID: inventory.ID,
+  await axios.post(`${API_URL}/inventories`, {
+    id: inventory.ID,
     ubicacion: inventory.location,
     capacidad: inventory.capacity,
-    cantidadAlmacenada: inventory.storedQuantity
+    cantidadInsumo: inventory.supplyQuantity,
+    tipo: inventory.type
   })
 }

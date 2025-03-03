@@ -1,21 +1,20 @@
-import { useQuery } from "@tanstack/react-query"
-import { fetchInventory } from "@api/admin/inventoryApi"
 import { Inventory } from "@interfaces/admin/InventoryTypes"
 
-const InventoryList = () => {
-  const { data: inventory = [], isLoading, error } = useQuery<Inventory[]>({
-    queryKey: ["inventory"],
-    queryFn: fetchInventory,
-  })
+interface Props {
+  inventories: Inventory[]
+  isLoading: boolean
+  error: unknown
+}
 
-  if (isLoading) return <p>Cargando inventario...</p>
-  if (error) return <p>Error cargando inventario.</p>
+const InventoryList = ({ inventories, isLoading, error }: Props) => {
+  if (isLoading) return <p>Cargando inventarios...</p>
+  if (error) return <p>Error cargando inventarios.</p>
 
   return (
     <ul>
-      {inventory.map((item) => (
-        <li key={item.ID}>
-          {item.location} - Capacidad: {item.capacity} - Almacenado: {item.storedQuantity}
+      {inventories.map(inventory => (
+        <li key={inventory.ID}>
+          {inventory.location} - Capacidad: {inventory.capacity} - Insumos: {inventory.supplyQuantity} - Tipos: {inventory.type.join(", ")}
         </li>
       ))}
     </ul>

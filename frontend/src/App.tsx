@@ -6,6 +6,7 @@ import AdminDashboard from "@pages/admin/dashboard"
 import SuppliersPage from "@pages/admin/suppliers"
 import IngredientsPage from "@pages/admin/ingredients"
 import OrdersPage from "@pages/admin/orders"
+import InventoryPage from "@pages/admin/inventory"
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="suppliers" element={<SuppliersPage />} />
         <Route path="ingredients" element={<IngredientsPage />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route path="inventory" element={<InventoryPage />} />
       </Route>
     </Routes>
   )

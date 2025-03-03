@@ -2,18 +2,40 @@ import { Request, Response } from "express";
 import { driver } from "../config/db";
 
 export const getAllInventories = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
+  const session = driver.session()
+
   try {
-    const result = await session.run(`MATCH (inv:Inventory) RETURN inv`);
-    const inventories = result.records.map(record => record.get("inv").properties);
-    res.json(inventories);
+    const result = await session.run(`
+      MATCH (inv)
+      WHERE inv:Inventory OR inv:ColdStorage OR inv:DryStorage
+      RETURN inv, labels(inv) AS labels
+    `)
+
+    const inventories = result.records.map(record => {
+      const properties = record.get("inv").properties
+      const labels = record.get("labels")
+
+      const tipo: string[] = labels.filter((label: string) => ["Inventory", "ColdStorage", "DryStorage"].includes(label))
+
+      return {
+        id: properties.id,
+        nombre: properties.nombre,
+        descripcion: properties.descripcion,
+        capacidad: properties.capacidad,
+        ubicacion: properties.ubicación,
+        cantidadInsumo: properties.cantidad_insumos,
+        tipo
+      }
+    })
+
+    res.json(inventories)
   } catch (error) {
-    console.error("Error obteniendo inventarios:", error);
-    res.status(500).json({ error: "Error obteniendo inventarios" });
+    console.error("Error obteniendo inventarios:", error)
+    res.status(500).json({ error: "Error obteniendo inventarios" })
   } finally {
-    await session.close();
+    await session.close()
   }
-};
+}
 
 export const getInventoryById = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session();

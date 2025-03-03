@@ -1,17 +1,18 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { createInventory } from "@api/admin/inventoryApi"
 import { Inventory } from "@interfaces/admin/InventoryTypes"
 import { useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import { inventorySchema } from "@validations/admin/inventorySchema"
 
-const InventoryForm = () => {
-  const queryClient = useQueryClient()
 
+interface Props {
+  refetch: () => void
+}
+
+const InventoryForm = ({ refetch }: Props) => {
   const mutation = useMutation({
     mutationFn: createInventory,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      refetch()
       reset()
     },
     onError: () => {
@@ -25,12 +26,13 @@ const InventoryForm = () => {
     reset,
     formState: { errors }
   } = useForm<Inventory>({
-    resolver: yupResolver(inventorySchema),
     defaultValues: {
       ID: "",
       location: "",
       capacity: 0,
-      storedQuantity: 0
+      supplyQuantity: 0,
+      storedQuantity: 0,
+      type: []
     }
   })
 
@@ -49,8 +51,13 @@ const InventoryForm = () => {
       <input type="number" placeholder="Capacidad" {...register("capacity")} />
       <p>{errors.capacity?.message}</p>
 
-      <input type="number" placeholder="Cantidad almacenada" {...register("storedQuantity")} />
-      <p>{errors.storedQuantity?.message}</p>
+      <input type="number" placeholder="Cantidad de insumos" {...register("supplyQuantity")} />
+      <p>{errors.supplyQuantity?.message}</p>
+
+      <label><input type="checkbox" value="Inventory" {...register("type")} /> Inventory</label>
+      <label><input type="checkbox" value="ColdStorage" {...register("type")} /> ColdStorage</label>
+      <label><input type="checkbox" value="DryStorage" {...register("type")} /> DryStorage</label>
+      <p>{errors.type?.message}</p>
 
       <button type="submit" disabled={mutation.isPending}>Guardar Inventario</button>
     </form>
