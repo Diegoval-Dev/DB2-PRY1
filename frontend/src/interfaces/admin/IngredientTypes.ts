@@ -20,3 +20,13 @@ export interface IngredientResponse {
   fechaCaducidad: string
   tipo: IngredientType[]
 }
+
+export interface CreateIngredientRequest {
+  id: string
+  nombre: string
+  categoría: string
+  precio: number
+  cantidad: number
+  fechaCaducidad: string
+  tipo: string[] // Las etiquetas (labels) como array de strings ["Ingredient", "Perishable", "Organic"]
+}

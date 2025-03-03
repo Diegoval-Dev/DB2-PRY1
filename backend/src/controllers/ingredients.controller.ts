@@ -56,19 +56,41 @@ export const getIngredientById = async (req: Request, res: Response, next: NextF
 
 export const createIngredient = async (req: Request, res: Response) => {
   const session = driver.session();
-  const { ID, nombre, categoría, precio, cantidad, fechaCaducidad } = req.body;
+  const { id, nombre, categoría, precio, cantidad, fechaCaducidad, tipo } = req.body;
+
+  if (!Array.isArray(tipo) || tipo.length === 0) {
+      res.status(400).json({ error: "Debe especificar al menos un tipo" });
+      return;
+  }
+
+  const labels = tipo.map(t => `\`${t}\``).join(":"); // Ejemplo: `Ingredient`:`Perishable`
+
+  const query = `
+      CREATE (i:${labels} {
+          id: $id,
+          nombre: $nombre,
+          categoría: $categoría,
+          precio: toFloat($precio),
+          cantidad_en_existencia: toInteger($cantidad),
+          fecha_caducidad: date($fechaCaducidad)
+      })
+  `;
+
+  console.log("Query generado:", query)
+  console.log("Parametros a insertar:", { id, nombre, categoría, precio, cantidad, fechaCaducidad })
+
   try {
-    await session.run(
-      `CREATE (:Ingredient {ID: $ID, nombre: $nombre, categoría: $categoría, precio: $precio, cantidad: $cantidad, fechaCaducidad: date($fechaCaducidad)})`,
-      { ID, nombre, categoría, precio, cantidad, fechaCaducidad }
-    );
-    res.json({ message: "Insumo creado" });
+      await session.run(query, { id, nombre, categoría, precio, cantidad, fechaCaducidad });
+      res.json({ message: "Insumo creado" });
   } catch (error) {
-    res.status(500).json({ error: "Error creando insumo" });
+      console.error("Error creando insumo:", error);
+      res.status(500).json({ error: "Error creando insumo" });
   } finally {
-    await session.close();
+      await session.close();
   }
 };
+
+
 
 export const updateIngredient = async (req: Request, res: Response) => {
   const session = driver.session();

@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query"
 import { createIngredient } from "@api/admin/ingredientsApi"
-import { Ingredient, IngredientType } from "@interfaces/admin/IngredientTypes"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { ingredientSchema } from "@validations/admin/ingredientSchema"
+import { CreateIngredientRequest } from "@interfaces/admin/IngredientTypes"
 
 interface Props {
   refetch: () => void
@@ -50,13 +50,18 @@ const IngredientForm = ({ refetch }: Props) => {
   })
 
   const onSubmit = (data: IngredientFormData) => {
-    const adaptedData: Ingredient = {
-      ...data,
-      type: data.type as IngredientType[]
+    const adapted: CreateIngredientRequest = {
+        id: data.ID,
+        nombre: data.name,
+        categoría: data.category,
+        precio: data.price,
+        cantidad: data.quantity,
+        fechaCaducidad: data.expirationDate,
+        tipo: data.type.filter((t): t is string => !!t) // quita undefined
     }
 
-    mutation.mutate(adaptedData)
-  }
+    mutation.mutate(adapted)
+}
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
