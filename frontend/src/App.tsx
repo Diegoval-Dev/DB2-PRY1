@@ -1,3 +1,7 @@
+import UserHome from "@pages/client/search-restaurant";
+import CreateOrder from "@pages/client/createOrder";
+import SummaryOrder from "@pages/client/summary-order";
+import Orders from "@pages/client/orders";
 import React from "react"
 import { Routes, Route } from "react-router-dom"
 import Home from "@pages/Home"
@@ -24,6 +28,10 @@ function App() {
         <Route path="locations" element={<LocationsPage />} />
         <Route path="routes" element={<RoutesPage />} />
         <Route path="categories" element={<CategoriesPage />} />
+        <Route path="/user" element={<UserHome />} />
+        <Route path="/user/create-order" element={<CreateOrder />} />
+        <Route path="/user/summary-order" element={<SummaryOrder />} />
+        <Route path="/user/orders" element={<Orders />} />
       </Route>
     </Routes>
   )
