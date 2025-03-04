@@ -29,3 +29,10 @@ export interface RouteFormData {
   distance: number
   transportType: string
 }
+
+export interface CreateRouteRequest {
+  origen: string
+  destino: string
+  distancia: number
+  tipoTransporte: string
+}

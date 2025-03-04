@@ -28,3 +28,20 @@ export const createSupplier = async (supplier: SupplierCreate): Promise<void> =>
 export const updateSupplierSupplies = async (id: string, supplies: Supply[]): Promise<void> => {
   await axios.put(`${API_URL}/suppliers/${id}/supplies`, { supplies })
 }
+
+export const updateSupplier = async (id: string, data: Partial<SupplierCreate>): Promise<void> => {
+  await axios.patch(`${API_URL}/suppliers/${id}`, data)
+}
+
+export const deleteSupplier = async (id: string): Promise<void> => {
+  await axios.delete(`${API_URL}/suppliers/${id}`)
+}
+
+export const fetchSupplierSupplies = async (supplierId: string): Promise<Supply[]> => {
+  const response = await axios.get<Supply[]>(`${API_URL}/suppliers/${supplierId}/supplies`)
+  return response.data
+}
+
+export const deleteMultipleSuppliers = async (ids: string[]): Promise<void> => {
+  await axios.post(`${API_URL}/suppliers/bulk-delete`, { ids })
+}

@@ -21,3 +21,8 @@ export interface LocationFormData {
   name: string
   locationType: (string | undefined)[]
 }
+
+export interface CreateLocationRequest {
+  nombre: string
+  tipoUbicacion: string[]
+}

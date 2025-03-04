@@ -1,16 +1,19 @@
 import { useMutation } from "@tanstack/react-query"
-import { createSupplier, updateSupplierSupplies } from "@api/admin/suppliersApi"
+import { createSupplier, updateSupplier, updateSupplierSupplies } from "@api/admin/suppliersApi"
 import { fetchIngredients } from "@api/admin/ingredientsApi"
 import { useForm, useFieldArray } from "react-hook-form"
 import { SupplierType, SupplierCreate, Supply } from "@interfaces/admin/SupplierTypes"
 import { Ingredient } from "@interfaces/admin/IngredientTypes"
 import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
 
 interface Props {
     refetch: () => void
+    initialData?: SupplierFormData 
+    closeModal?: () => void       
 }
 
-interface SupplierFormData {
+export interface SupplierFormData {
     ID: string
     name: string
     location: string
@@ -25,16 +28,39 @@ interface SupplyFormData {
     fecha: string
 }
 
-const SupplierForm = ({ refetch }: Props) => {
-    const mutation = useMutation({
+const SupplierForm = ({ refetch, initialData, closeModal }: Props) => {
+    const isEdit = !!initialData
+
+    const createMutation = useMutation({
         mutationFn: createSupplier,
         onSuccess: async (_, variables) => {
             await updateSupplies(variables.id, getValues().supplies)
             refetch()
             reset()
+            closeModal?.()
         },
         onError: () => {
             alert("Error al crear proveedor")
+        }
+    })
+
+    const updateMutation = useMutation({
+        mutationFn: async (data: SupplierFormData) => {
+            await updateSupplier(data.ID, {
+                nombre: data.name,
+                ubicación: data.location,
+                calificación: data.rating,
+                tipo: data.type as SupplierType[]
+            })
+            await updateSupplies(data.ID, data.supplies)
+        },
+        onSuccess: () => {
+            refetch()
+            reset()
+            closeModal?.()
+        },
+        onError: () => {
+            alert("Error al actualizar proveedor")
         }
     })
 
@@ -59,34 +85,45 @@ const SupplierForm = ({ refetch }: Props) => {
         name: "supplies"
     })
 
-    const onSubmit = async (data: SupplierFormData) => {
-        const supplier: SupplierCreate = {
-            id: data.ID,
-            nombre: data.name,
-            ubicación: data.location,
-            calificación: data.rating,
-            tipo: data.type.filter((t): t is SupplierType => t === "Supplier" || t === "Distributor" || t === "Wholesaler")
+    useEffect(() => {
+        if (initialData) {
+            reset(initialData)
         }
+    }, [initialData, reset])
 
-        mutation.mutate(supplier)
+    const onSubmit = (data: SupplierFormData) => {
+        if (isEdit) {
+            updateMutation.mutate(data)
+        } else {
+            const supplier: SupplierCreate = {
+                id: data.ID,
+                nombre: data.name,
+                ubicación: data.location,
+                calificación: data.rating,
+                tipo: data.type.filter((t): t is SupplierType => t === "Supplier" || t === "Distributor" || t === "Wholesaler")
+            }
+            createMutation.mutate(supplier)
+        }
     }
 
     const updateSupplies = async (supplierId: string, supplies: SupplyFormData[]) => {
-        const adaptedSupplies: Supply[] = supplies.filter(s => s.ingredientId && s.cantidad > 0 && s.fecha).map(s => ({
-            ingredientId: s.ingredientId,
-            cantidad: s.cantidad,
-            fecha: s.fecha
-        }))
+        const adaptedSupplies: Supply[] = supplies
+            .filter(s => s.ingredientId && s.cantidad > 0 && s.fecha)
+            .map(s => ({
+                ingredientId: s.ingredientId,
+                cantidad: s.cantidad,
+                fecha: s.fecha
+            }))
 
         await updateSupplierSupplies(supplierId, adaptedSupplies)
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="text" placeholder="ID" {...register("ID")} />
+            <input type="text" placeholder="ID" {...register("ID")} disabled={isEdit} />
             <input type="text" placeholder="Nombre" {...register("name")} />
             <input type="text" placeholder="Ubicacion" {...register("location")} />
-            <input type="number" placeholder="Calificacion (1-5)" {...register("rating")} />
+            <input type="number"step="any" placeholder="Calificacion (1-5)" {...register("rating")} />
 
             <label><input type="checkbox" value="Supplier" {...register("type")} /> Supplier</label>
             <label><input type="checkbox" value="Distributor" {...register("type")} /> Distributor</label>
@@ -112,7 +149,9 @@ const SupplierForm = ({ refetch }: Props) => {
                 Agregar Producto
             </button>
 
-            <button type="submit" disabled={mutation.isPending}>Guardar Proveedor</button>
+            <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                {isEdit ? "Actualizar Proveedor" : "Guardar Proveedor"}
+            </button>
         </form>
     )
 }

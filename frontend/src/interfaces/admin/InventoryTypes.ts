@@ -15,3 +15,11 @@ export interface InventoryResponse {
   cantidadInsumo: number
   tipo: InventoryType[]
 }
+
+export interface CreateInventoryRequest {
+  id: string
+  capacidad: number
+  cantidadInsumo: number
+  tipo: InventoryType[]
+  ubicacion: string
+}

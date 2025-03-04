@@ -207,3 +207,64 @@ export const updateSupplierProperty = async (req: Request, res: Response) => {
       await session.close()
   }
 }
+
+export const getSupplierSupplies = async (req: Request, res: Response) => {
+  const session = driver.session()
+  const { id } = req.params
+
+  console.log(`📡 Buscando suministros para el proveedor con id: ${id}`)
+
+  try {
+      const query = `
+          MATCH (s:Supplier {id: $id})- [r:SUPPLIES] -> (i:Ingredient)
+          RETURN i.id AS ingredientId, r.cantidad AS cantidad, toString(r.fecha) AS fecha
+      `
+      const result = await session.run(query, { id })
+
+      console.log(`🔎 Query ejecutada. Total de relaciones encontradas: ${result.records.length}`)
+
+      if (result.records.length === 0) {
+          res.json([]) // Proveedor existe, pero no tiene suministros
+          return
+      }
+
+      const supplies = result.records.map(record => ({
+        ingredientId: record.get("ingredientId"),
+        cantidad: parseFloat(record.get("cantidad")),  // <- Esto es lo correcto
+        fecha: record.get("fecha")
+    }))
+      console.log("✅ Suministros encontrados:", supplies)
+
+      res.json(supplies)
+  } catch (error) {
+      console.error("❌ Error obteniendo suministros del proveedor:", error)
+      res.status(500).json({ error: "Error obteniendo suministros del proveedor" })
+  } finally {
+      await session.close()
+  }
+}
+
+export const deleteMultipleSuppliers = async (req: Request, res: Response) => {
+  const session = driver.session()
+  const { ids } = req.body 
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+      res.status(400).json({ error: "Debe proporcionar al menos un ID" })
+      return
+  }
+
+  try {
+      const query = `
+          UNWIND $ids AS supplierId
+          MATCH (s:Supplier {id: supplierId})
+          DETACH DELETE s
+      `
+      await session.run(query, { ids })
+      res.json({ message: "Proveedores eliminados correctamente" })
+  } catch (error) {
+      console.error("Error eliminando proveedores:", error)
+      res.status(500).json({ error: "Error eliminando proveedores" })
+  } finally {
+      await session.close()
+  }
+}

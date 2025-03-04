@@ -1,44 +1,52 @@
 import { useMutation } from "@tanstack/react-query"
-import { createCategory } from "@api/admin/categoriesApi"
+import { createCategory, updateCategory } from "@api/admin/categoriesApi"
 import { useForm } from "react-hook-form"
+import { useEffect } from "react"
+import { Category } from "@interfaces/admin/CategoryTypes"
 
 interface Props {
     refetch: () => void
+    initialData?: Category
+    closeModal?: () => void
 }
 
-interface CategoryFormData {
-    id: string
-    nombre: string
-}
+const CategoryForm = ({ refetch, initialData, closeModal }: Props) => {
+    const isEdit = !!initialData
 
-const CategoryForm = ({ refetch }: Props) => {
     const mutation = useMutation({
-        mutationFn: createCategory,
+        mutationFn: (data: Category) => {
+            return isEdit ? updateCategory(data.id, data) : createCategory(data)
+        },
         onSuccess: () => {
             refetch()
             reset()
+            closeModal?.()
         },
-        onError: () => {
-            alert("Error al crear categoría")
-        }
+        onError: () => alert("Error al guardar categoría")
     })
 
-    const { register, handleSubmit, reset } = useForm<CategoryFormData>({
-        defaultValues: {
+    const { register, handleSubmit, reset } = useForm<Category>({
+        defaultValues: initialData || {
             id: "",
             nombre: ""
         }
     })
 
-    const onSubmit = (data: CategoryFormData) => {
+    useEffect(() => {
+        if (initialData) reset(initialData)
+    }, [initialData, reset])
+
+    const onSubmit = (data: Category) => {
         mutation.mutate(data)
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="text" placeholder="ID" {...register("id")} />
-            <input type="text" placeholder="Nombre" {...register("nombre")} />
-            <button type="submit">Guardar Categoría</button>
+            <input placeholder="ID" {...register("id")} disabled={isEdit} />
+            <input placeholder="Nombre" {...register("nombre")} />
+            <button type="submit">
+                {isEdit ? "Actualizar Categoría" : "Guardar Categoría"}
+            </button>
         </form>
     )
 }

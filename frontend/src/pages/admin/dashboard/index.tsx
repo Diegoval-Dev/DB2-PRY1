@@ -1,14 +1,12 @@
-import DashboardSummary from "@components/admin/dashboard/DashboardSummary"
-import DashboardChart from "@components/admin/dashboard/DashboardChart"
+import Dashboard from "@components/admin/dashboard/Dashboard"
 
-const AdminDashboard = () => {
-  return (
-    <div>
-      <h1>Dashboard - Administrador</h1>
-      <DashboardSummary />
-      <DashboardChart />
-    </div>
-  )
+const HomePage = () => {
+    return (
+        <div>
+            <h1>Dashboard General</h1>
+            <Dashboard />
+        </div>
+    )
 }
 
-export default AdminDashboard
+export default HomePage

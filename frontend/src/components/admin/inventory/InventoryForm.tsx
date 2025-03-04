@@ -1,23 +1,38 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createInventory } from "@api/admin/inventoryApi"
+import { createInventory, updateInventory } from "@api/admin/inventoryApi"
 import { getAllLocations } from "@api/admin/locationsApi"
-import { Inventory } from "@interfaces/admin/InventoryTypes"
 import { useForm } from "react-hook-form"
+import { Inventory } from "@interfaces/admin/InventoryTypes"
+import { useEffect } from "react"
 
 interface Props {
     refetch: () => void
+    initialData?: Inventory
+    closeModal?: () => void
 }
 
-const InventoryForm = ({ refetch }: Props) => {
+const InventoryForm = ({ refetch, initialData, closeModal }: Props) => {
+    const isEdit = !!initialData
+
     const mutation = useMutation({
-        mutationFn: createInventory,
+        mutationFn: (data: Inventory) => {
+            if (isEdit) {
+                return updateInventory(data.ID, {
+                    capacidad: data.capacity,
+                    cantidadInsumo: data.supplyQuantity,
+                    tipo: data.type,
+                    ubicacion: data.location
+                })
+            } else {
+                return createInventory(data)
+            }
+        },
         onSuccess: () => {
             refetch()
             reset()
+            closeModal?.()
         },
-        onError: () => {
-            alert("Error al crear inventario")
-        }
+        onError: () => alert("Error al guardar inventario")
     })
 
     const { data: locations = [] } = useQuery({
@@ -28,18 +43,22 @@ const InventoryForm = ({ refetch }: Props) => {
     const {
         register,
         handleSubmit,
-        reset,
-        formState: { errors }
+        reset
     } = useForm<Inventory>({
-        defaultValues: {
+        defaultValues: initialData || {
             ID: "",
             location: "",
             capacity: 0,
             supplyQuantity: 0,
-            storedQuantity: 0,
             type: []
         }
     })
+
+    useEffect(() => {
+        if (initialData) {
+            reset(initialData)
+        }
+    }, [initialData, reset])
 
     const onSubmit = (data: Inventory) => {
         mutation.mutate(data)
@@ -47,10 +66,8 @@ const InventoryForm = ({ refetch }: Props) => {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="text" placeholder="ID" {...register("ID")} />
-            <p>{errors.ID?.message}</p>
+            <input placeholder="ID" {...register("ID")} disabled={isEdit} />
 
-            {/* Select para ubicación */}
             <select {...register("location")}>
                 <option value="">Seleccione una ubicación</option>
                 {locations.map(location => (
@@ -59,20 +76,17 @@ const InventoryForm = ({ refetch }: Props) => {
                     </option>
                 ))}
             </select>
-            <p>{errors.location?.message}</p>
 
-            <input type="number" placeholder="Capacidad" {...register("capacity")} />
-            <p>{errors.capacity?.message}</p>
-
+            <input type="number" step="any" placeholder="Capacidad" {...register("capacity")} />
             <input type="number" placeholder="Cantidad de insumos" {...register("supplyQuantity")} />
-            <p>{errors.supplyQuantity?.message}</p>
 
             <label><input type="checkbox" value="Inventory" {...register("type")} /> Inventory</label>
             <label><input type="checkbox" value="ColdStorage" {...register("type")} /> ColdStorage</label>
             <label><input type="checkbox" value="DryStorage" {...register("type")} /> DryStorage</label>
-            <p>{errors.type?.message}</p>
 
-            <button type="submit" disabled={mutation.isPending}>Guardar Inventario</button>
+            <button type="submit">
+                {isEdit ? "Actualizar Inventario" : "Guardar Inventario"}
+            </button>
         </form>
     )
 }

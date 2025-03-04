@@ -1,24 +1,36 @@
 import { Ingredient } from "@interfaces/admin/IngredientTypes"
+import { deleteIngredient } from "@api/admin/ingredientsApi"
+import { useMutation } from "@tanstack/react-query"
 
 interface Props {
-  ingredients: Ingredient[]
-  isLoading: boolean
-  error: unknown
+    ingredients: Ingredient[]
+    isLoading: boolean
+    error: unknown
+    onEdit: (ingredient: Ingredient) => void
+    refetch: () => void
 }
 
-const IngredientList = ({ ingredients, isLoading, error }: Props) => {
-  if (isLoading) return <p>Cargando ingredientes...</p>
-  if (error) return <p>Error cargando ingredientes.</p>
+const IngredientList = ({ ingredients, isLoading, error, onEdit, refetch }: Props) => {
+    const deleteMutation = useMutation({
+        mutationFn: deleteIngredient,
+        onSuccess: () => refetch(),
+        onError: () => alert("Error eliminando insumo")
+    })
 
-  return (
-    <ul>
-      {ingredients.map(ingredient => (
-        <li key={ingredient.ID}>
-          {ingredient.name} - {ingredient.category} - Q{ingredient.price} ({ingredient.quantity} en existencia) - Tipos: {ingredient.type.join(", ")}
-        </li>
-      ))}
-    </ul>
-  )
+    if (isLoading) return <p>Cargando...</p>
+    if (error) return <p>Error cargando...</p>
+
+    return (
+        <ul>
+            {ingredients.map(i => (
+                <li key={i.ID}>
+                    {i.name} - Q{i.price}
+                    <button onClick={() => onEdit(i)}>Editar</button>
+                    <button onClick={() => deleteMutation.mutate(i.ID)}>Eliminar</button>
+                </li>
+            ))}
+        </ul>
+    )
 }
 
 export default IngredientList

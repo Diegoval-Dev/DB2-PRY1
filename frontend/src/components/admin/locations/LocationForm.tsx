@@ -1,58 +1,66 @@
 import { useMutation } from "@tanstack/react-query"
-import { createLocation } from "@api/admin/locationsApi"
+import { createLocation, updateLocation, adaptLocationToRequest } from "@api/admin/locationsApi"
 import { useForm } from "react-hook-form"
 import { LocationFormData } from "@interfaces/admin/LocationTypes"
-import { adaptLocationToRequest } from "@api/admin/locationsApi"
+import { useEffect } from "react"
 
 interface Props {
     refetch: () => void
+    initialData?: LocationFormData
+    closeModal?: () => void
 }
 
-const LocationForm = ({ refetch }: Props) => {
+const LocationForm = ({ refetch, initialData, closeModal }: Props) => {
+    const isEdit = !!initialData
+
     const mutation = useMutation({
-        mutationFn: createLocation,
+        mutationFn: (data: LocationFormData) => {
+            const adapted = adaptLocationToRequest(data)
+            return isEdit ? updateLocation(data.ID, adapted) : createLocation(adapted)
+        },
         onSuccess: () => {
             refetch()
             reset()
+            closeModal?.()
         },
         onError: () => {
-            alert("Error al crear ubicación")
+            alert("Error al guardar ubicación")
         }
     })
 
     const {
         register,
         handleSubmit,
-        reset,
-        formState: { errors }
+        reset
     } = useForm<LocationFormData>({
-        defaultValues: {
+        defaultValues: initialData || {
             ID: "",
             name: "",
             locationType: []
         }
     })
 
+    useEffect(() => {
+        if (initialData) reset(initialData)
+    }, [initialData, reset])
+
     const onSubmit = (data: LocationFormData) => {
-        const adapted = adaptLocationToRequest(data)
-        mutation.mutate(adapted)
+        mutation.mutate(data)
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="text" placeholder="ID" {...register("ID")} />
-            <p>{errors.ID?.message}</p>
-
-            <input type="text" placeholder="Nombre" {...register("name")} />
-            <p>{errors.name?.message}</p>
+            <input placeholder="ID" {...register("ID")} disabled={isEdit} />
+            <input placeholder="Nombre" {...register("name")} />
 
             <label><input type="checkbox" value="Location" {...register("locationType")} /> Location</label>
             <label><input type="checkbox" value="Warehouse" {...register("locationType")} /> Warehouse</label>
             <label><input type="checkbox" value="Restaurant" {...register("locationType")} /> Restaurant</label>
             <label><input type="checkbox" value="DistributionCenter" {...register("locationType")} /> Centro de Distribución</label>
-            <p>{errors.locationType?.message}</p>
 
-            <button type="submit" disabled={mutation.isPending}>Guardar Ubicación</button>
+            <button type="submit">
+                {isEdit ? "Actualizar Ubicación" : "Guardar Ubicación"}
+            </button>
         </form>
     )
 }

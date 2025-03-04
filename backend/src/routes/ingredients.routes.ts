@@ -7,7 +7,7 @@ const upload = multer({ dest: "uploads/" });
 router.get("/", getAllIngredients);
 router.get("/:id", getIngredientById);
 router.post("/", createIngredient);
-router.put("/:id", updateIngredient);
+router.patch("/:id", updateIngredient);
 router.delete("/:id", deleteIngredient);
 router.post("/bulk", upload.single("file"), bulkLoadIngredients);
 

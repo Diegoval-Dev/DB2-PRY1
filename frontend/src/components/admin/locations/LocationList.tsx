@@ -1,31 +1,35 @@
-import { useQuery } from "@tanstack/react-query"
-import { getAllLocations } from "@api/admin/locationsApi"
-import { adaptLocationFromResponse } from "@api/admin/locationsApi"
 import { Location } from "@interfaces/admin/LocationTypes"
+import { deleteLocation } from "@api/admin/locationsApi"
+import { useMutation } from "@tanstack/react-query"
 
-const LocationList = () => {
-    const { data, isLoading } = useQuery({
-        queryKey: ["locations"],
-        queryFn: getAllLocations
+interface Props {
+    locations: Location[]
+    isLoading: boolean
+    error: unknown
+    onEdit: (location: Location) => void
+    refetch: () => void
+}
+
+const LocationList = ({ locations, isLoading, error, onEdit, refetch }: Props) => {
+    const deleteMutation = useMutation({
+        mutationFn: deleteLocation,
+        onSuccess: () => refetch(),
+        onError: () => alert("Error eliminando ubicación")
     })
 
-    if (isLoading) {
-        return <p>Cargando ubicaciones...</p>
-    }
-
-    const locations: Location[] = data?.map(adaptLocationFromResponse) || []
+    if (isLoading) return <p>Cargando ubicaciones...</p>
+    if (error) return <p>Error cargando ubicaciones.</p>
 
     return (
-        <div>
-            <h3>Listado de Ubicaciones</h3>
-            <ul>
-                {locations.map(location => (
-                    <li key={location.ID}>
-                        {location.ID} - {location.name} ({location.locationType.join(", ")})
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <ul>
+            {locations.map(location => (
+                <li key={location.id}>
+                    {location.nombre} - Tipos: {location.tipoUbicacion.join(", ")}
+                    <button onClick={() => onEdit(location)}>Editar</button>
+                    <button onClick={() => deleteMutation.mutate(location.id)}>Eliminar</button>
+                </li>
+            ))}
+        </ul>
     )
 }
 

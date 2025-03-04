@@ -5,7 +5,7 @@ const router = Router();
 
 router.get("/", getAllRoutes);
 router.post("/", createRoute);
-router.put("/:id", updateRoute);
+router.patch("/:id", updateRoute);
 router.delete("/:id", deleteRoute);
 
 export default router;

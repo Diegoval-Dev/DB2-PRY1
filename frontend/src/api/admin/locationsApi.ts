@@ -1,5 +1,5 @@
 import axios from "axios"
-import { LocationFormData, LocationRequest, LocationResponse, Location } from "@interfaces/admin/LocationTypes"
+import { LocationFormData, LocationRequest, LocationResponse, Location, CreateLocationRequest } from "@interfaces/admin/LocationTypes"
 
 const API_URL = "http://localhost:4000/api/locations"
 
@@ -19,6 +19,15 @@ export const adaptLocationFromResponse = (response: LocationResponse): Location 
       locationType: response.tipoUbicacion
   }
 }
+
+export const updateLocation = async (id: string, data: Partial<CreateLocationRequest>): Promise<void> => {
+  await axios.patch(`${API_URL}/${id}`, data)
+}
+
+export const deleteLocation = async (id: string): Promise<void> => {
+  await axios.delete(`${API_URL}/${id}`)
+}
+
 
 export const adaptLocationToRequest = (formData: LocationFormData): LocationRequest => {
   return {

@@ -12,7 +12,7 @@ const router = Router();
 router.get("/", getAllInventories);
 router.get("/:id", getInventoryById);
 router.post("/", createInventory);
-router.put("/:id", updateInventory);
+router.patch("/:id", updateInventory);
 router.delete("/:id", deleteInventory);
 
 export default router;

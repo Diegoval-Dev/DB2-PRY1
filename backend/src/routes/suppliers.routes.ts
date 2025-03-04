@@ -6,7 +6,9 @@ import {
   updateSupplier, 
   deleteSupplier, 
   updateSupplies,
-  updateSupplierProperty
+  updateSupplierProperty,
+  getSupplierSupplies,
+  deleteMultipleSuppliers
 } from "../controllers/suppliers.controller";
 
 const router = Router();
@@ -18,5 +20,7 @@ router.put("/:id", updateSupplier);
 router.put("/:id/supplies", updateSupplies);
 router.delete("/:id", deleteSupplier);
 router.patch("/:id", updateSupplierProperty)
+router.get("/:id/supplies", getSupplierSupplies)
+router.post("/bulk-delete", deleteMultipleSuppliers)
 
 export default router;

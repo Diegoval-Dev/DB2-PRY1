@@ -12,6 +12,11 @@ export const createCategory = async (category: Category): Promise<void> => {
     await axios.post(`${API_URL}/categories`, category)
 }
 
+
+export const updateCategory = async (id: string, data: Partial<Category>): Promise<void> => {
+    await axios.patch(`${API_URL}/categories/${id}`, data)
+}
+
 export const deleteCategory = async (id: string): Promise<void> => {
     await axios.delete(`${API_URL}/categories/${id}`)
 }
