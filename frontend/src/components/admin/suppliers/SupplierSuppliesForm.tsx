@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { Supply } from "@interfaces/admin/SupplierTypes"
 import { Ingredient } from "@interfaces/admin/IngredientTypes"
 import { useEffect } from "react"
+import styles from './SupplierSuppliesForm.module.css'
 
 interface Props {
     supplierId: string
@@ -51,12 +52,13 @@ const SupplierSuppliesForm = ({ supplierId, initialSupplies, closeModal, refetch
         mutation.mutate(data.supplies)
     }
 
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <h3>Productos que suministra</h3>
+        <form className={styles.suppliesForm} onSubmit={handleSubmit(onSubmit)}>
+            <h3 className={styles.sectionTitle}>Productos que suministra</h3>
             {fields.map((field, index) => (
-                <div key={field.id} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <select {...register(`supplies.${index}.ingredientId` as const)}>
+                <div className={styles.supplyRow} key={field.id}>
+                    <select className={styles.select} {...register(`supplies.${index}.ingredientId` as const)}>
                         <option value="">Seleccione Ingrediente</option>
                         {ingredients.map(ingredient => (
                             <option key={ingredient.ID} value={ingredient.ID}>
@@ -64,18 +66,40 @@ const SupplierSuppliesForm = ({ supplierId, initialSupplies, closeModal, refetch
                             </option>
                         ))}
                     </select>
-                    <input type="number" placeholder="Cantidad" {...register(`supplies.${index}.cantidad` as const)} />
-                    <input type="date" placeholder="Fecha" {...register(`supplies.${index}.fecha` as const)} />
-                    <button type="button" onClick={() => remove(index)}>Eliminar</button>
+                    <input
+                        className={styles.input}
+                        type="number"
+                        placeholder="Cantidad"
+                        {...register(`supplies.${index}.cantidad` as const)}
+                    />
+                    <input
+                        className={styles.input}
+                        type="date"
+                        placeholder="Fecha"
+                        {...register(`supplies.${index}.fecha` as const)}
+                    />
+                    <button
+                        className={styles.deleteButton}
+                        type="button"
+                        onClick={() => remove(index)}
+                    >
+                        Eliminar
+                    </button>
                 </div>
             ))}
-            <button type="button" onClick={() => append({ ingredientId: "", cantidad: 0, fecha: "" })}>
+            <button
+                className={styles.addButton}
+                type="button"
+                onClick={() => append({ ingredientId: "", cantidad: 0, fecha: "" })}
+            >
                 Agregar Producto
             </button>
-
-            <button type="submit">Guardar Suministros</button>
+            <button className={styles.submitButton} type="submit">
+                Guardar Suministros
+            </button>
         </form>
     )
+    
 }
 
 export default SupplierSuppliesForm

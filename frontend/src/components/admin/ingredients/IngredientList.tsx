@@ -1,6 +1,7 @@
 import { Ingredient } from "@interfaces/admin/IngredientTypes"
 import { deleteIngredient } from "@api/admin/ingredientsApi"
 import { useMutation } from "@tanstack/react-query"
+import styles from './IngredientList.module.css'
 
 interface Props {
     ingredients: Ingredient[]
@@ -21,12 +22,18 @@ const IngredientList = ({ ingredients, isLoading, error, onEdit, refetch }: Prop
     if (error) return <p>Error cargando...</p>
 
     return (
-        <ul>
+        <ul className={styles.ingredientList}>
             {ingredients.map(i => (
-                <li key={i.ID}>
-                    {i.name} - Q{i.price}
-                    <button onClick={() => onEdit(i)}>Editar</button>
-                    <button onClick={() => deleteMutation.mutate(i.ID)}>Eliminar</button>
+                <li className={styles.ingredientItem} key={i.ID}>
+                    <span className={styles.ingredientInfo}>{i.name} - Q{i.price}</span>
+                    <div className={styles.actions}>
+                        <button className={`${styles.actionButton} ${styles.editButton}`} onClick={() => onEdit(i)}>
+                            Editar
+                        </button>
+                        <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => deleteMutation.mutate(i.ID)}>
+                            Eliminar
+                        </button>
+                    </div>
                 </li>
             ))}
         </ul>

@@ -5,6 +5,7 @@ import { fetchCategories } from "@api/admin/categoriesApi"
 import { useForm, useFieldArray } from "react-hook-form"
 import { StorageRequest } from "@interfaces/admin/IngredientTypes"
 import { useEffect } from "react"
+import styles from './IngredientForm.module.css'
 
 interface Props {
     refetch: () => void
@@ -87,36 +88,44 @@ const IngredientForm = ({ refetch, initialData, closeModal }: Props) => {
         })
     }
 
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <input placeholder="ID" {...register("ID")} disabled={isEdit} />
-            <input placeholder="Nombre" {...register("name")} />
-            <input type="number" step="any" placeholder="Precio" {...register("price")} />
-            <input type="date" placeholder="Fecha de Caducidad" {...register("expirationDate")} />
-
-            <label><input type="checkbox" value="Ingredient" {...register("type")} /> Ingredient</label>
-            <label><input type="checkbox" value="Perishable" {...register("type")} /> Perishable</label>
-            <label><input type="checkbox" value="Organic" {...register("type")} /> Organic</label>
-
-            <select {...register("categoryId")}>
-                <option value="">Seleccione Categoría</option>
+        <form className={styles.ingredientForm} onSubmit={handleSubmit(onSubmit)}>
+            <input className={styles.input} placeholder="ID" {...register("ID")} disabled={isEdit} />
+            <input className={styles.input} placeholder="Nombre" {...register("name")} />
+            <input className={styles.input} type="number" step="any" placeholder="Precio" {...register("price")} />
+            <input className={styles.input} type="date" placeholder="Fecha de Caducidad" {...register("expirationDate")} />
+    
+            <div className={styles.checkboxGroup}>
+                <label><input type="checkbox" value="Ingredient" {...register("type")} /> Ingredient</label>
+                <label><input type="checkbox" value="Perishable" {...register("type")} /> Perishable</label>
+                <label><input type="checkbox" value="Organic" {...register("type")} /> Organic</label>
+            </div>
+    
+            <select className={styles.select} {...register("categoryId")}>
+                <option value="">Seleccione Categoria</option>
                 {categories.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
-
-            <h3>Almacenamiento</h3>
+    
+            <h3 className={styles.sectionTitle}>Almacenamiento</h3>
             {fields.map((field, index) => (
-                <div key={field.id}>
-                    <select {...register(`storages.${index}.inventoryId`)}>
+                <div key={field.id} className={styles.storageRow}>
+                    <select className={styles.select} {...register(`storages.${index}.inventoryId`)}>
                         {inventories.map(i => <option key={i.ID} value={i.ID}>{i.ID} - {i.location}</option>)}
                     </select>
-                    <input type="number" {...register(`storages.${index}.cantidad`)} />
-                    <button type="button" onClick={() => remove(index)}>Eliminar</button>
+                    <input className={styles.input} type="number" {...register(`storages.${index}.cantidad`)} />
+                    <button className={styles.deleteButton} type="button" onClick={() => remove(index)}>Eliminar</button>
                 </div>
             ))}
-            <button type="button" onClick={() => append({ inventoryId: "", cantidad: 0 })}>Agregar Almacenamiento</button>
-            <button type="submit">{isEdit ? "Actualizar Insumo" : "Crear Insumo"}</button>
+            <button className={styles.addButton} type="button" onClick={() => append({ inventoryId: "", cantidad: 0 })}>
+                Agregar Almacenamiento
+            </button>
+            <button className={styles.submitButton} type="submit">
+                {isEdit ? "Actualizar Insumo" : "Crear Insumo"}
+            </button>
         </form>
     )
+    
 }
 
 export default IngredientForm

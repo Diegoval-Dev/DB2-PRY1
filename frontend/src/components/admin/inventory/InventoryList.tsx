@@ -1,6 +1,7 @@
 import { Inventory } from "@interfaces/admin/InventoryTypes"
 import { deleteInventory } from "@api/admin/inventoryApi"
 import { useMutation } from "@tanstack/react-query"
+import styles from './InventoryList.module.css'
 
 interface Props {
     inventories: Inventory[]
@@ -21,12 +22,20 @@ const InventoryList = ({ inventories, isLoading, error, onEdit, refetch }: Props
     if (error) return <p>Error cargando inventarios.</p>
 
     return (
-        <ul>
+        <ul className={styles.inventoryList}>
             {inventories.map(inv => (
-                <li key={inv.ID}>
-                    {inv.ID} - {inv.location} - {inv.capacity} capacidad - {inv.supplyQuantity} insumos
-                    <button onClick={() => onEdit(inv)}>Editar</button>
-                    <button onClick={() => deleteMutation.mutate(inv.ID)}>Eliminar</button>
+                <li className={styles.inventoryItem} key={inv.ID}>
+                    <span className={styles.inventoryInfo}>
+                        {inv.ID} - {inv.location} - {inv.capacity} capacidad - {inv.supplyQuantity} insumos
+                    </span>
+                    <div className={styles.actions}>
+                        <button className={`${styles.actionButton} ${styles.editButton}`} onClick={() => onEdit(inv)}>
+                            Editar
+                        </button>
+                        <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => deleteMutation.mutate(inv.ID)}>
+                            Eliminar
+                        </button>
+                    </div>
                 </li>
             ))}
         </ul>

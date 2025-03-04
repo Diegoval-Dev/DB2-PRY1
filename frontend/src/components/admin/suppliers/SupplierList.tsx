@@ -2,6 +2,7 @@ import { Supplier } from "@interfaces/admin/SupplierTypes"
 import { useMutation } from "@tanstack/react-query"
 import { deleteSupplier, deleteMultipleSuppliers } from "@api/admin/suppliersApi"
 import { useState } from "react"
+import styles from './SupplierList.module.css'
 
 interface Props {
     suppliers: Supplier[]
@@ -41,30 +42,47 @@ const SupplierList = ({ suppliers, isLoading, error, onEdit, refetch }: Props) =
     if (error) return <p>Error al cargar proveedores</p>
 
     return (
-        <div>
+        <div className={styles.supplierListContainer}>
             <button
+                className={styles.bulkDeleteButton}
                 onClick={() => bulkDeleteMutation.mutate(selectedIds)}
                 disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
             >
                 Eliminar Seleccionados ({selectedIds.length})
             </button>
-
-            <ul>
+    
+            <ul className={styles.supplierList}>
                 {suppliers.map(supplier => (
-                    <li key={supplier.ID}>
+                    <li className={styles.supplierItem} key={supplier.ID}>
                         <input
+                            className={styles.checkbox}
                             type="checkbox"
                             checked={selectedIds.includes(supplier.ID)}
                             onChange={() => toggleSelect(supplier.ID)}
                         />
-                        {supplier.name} - {supplier.location} - {supplier.rating} ⭐️
-                        <button onClick={() => onEdit(supplier)}>Editar</button>
-                        <button onClick={() => deleteMutation.mutate(supplier.ID)}>Eliminar</button>
+                        <span className={styles.supplierInfo}>
+                            {supplier.name} - {supplier.location} - {supplier.rating} ⭐️
+                        </span>
+                        <div className={styles.actions}>
+                            <button
+                                className={`${styles.actionButton} ${styles.editButton}`}
+                                onClick={() => onEdit(supplier)}
+                            >
+                                Editar
+                            </button>
+                            <button
+                                className={`${styles.actionButton} ${styles.deleteButton}`}
+                                onClick={() => deleteMutation.mutate(supplier.ID)}
+                            >
+                                Eliminar
+                            </button>
+                        </div>
                     </li>
                 ))}
             </ul>
         </div>
     )
+    
 }
 
 export default SupplierList

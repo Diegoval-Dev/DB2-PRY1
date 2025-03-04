@@ -4,6 +4,7 @@ import { getAllLocations } from "@api/admin/locationsApi"
 import { useForm } from "react-hook-form"
 import { Inventory } from "@interfaces/admin/InventoryTypes"
 import { useEffect } from "react"
+import styles from './InventoryForm.module.css'
 
 interface Props {
     refetch: () => void
@@ -65,26 +66,28 @@ const InventoryForm = ({ refetch, initialData, closeModal }: Props) => {
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <input placeholder="ID" {...register("ID")} disabled={isEdit} />
-
-            <select {...register("location")}>
-                <option value="">Seleccione una ubicación</option>
+        <form className={styles.inventoryForm} onSubmit={handleSubmit(onSubmit)}>
+            <input className={styles.input} placeholder="ID" {...register("ID")} disabled={isEdit} />
+    
+            <select className={styles.select} {...register("location")}>
+                <option value="">Seleccione una ubicacion</option>
                 {locations.map(location => (
                     <option key={location.id} value={location.id}>
                         {location.nombre} ({location.id})
                     </option>
                 ))}
             </select>
-
-            <input type="number" step="any" placeholder="Capacidad" {...register("capacity")} />
-            <input type="number" placeholder="Cantidad de insumos" {...register("supplyQuantity")} />
-
-            <label><input type="checkbox" value="Inventory" {...register("type")} /> Inventory</label>
-            <label><input type="checkbox" value="ColdStorage" {...register("type")} /> ColdStorage</label>
-            <label><input type="checkbox" value="DryStorage" {...register("type")} /> DryStorage</label>
-
-            <button type="submit">
+    
+            <input className={styles.input} type="number" step="any" placeholder="Capacidad" {...register("capacity")} />
+            <input className={styles.input} type="number" placeholder="Cantidad de insumos" {...register("supplyQuantity")} />
+    
+            <div className={styles.checkboxGroup}>
+                <label><input type="checkbox" value="Inventory" {...register("type")} /> Inventory</label>
+                <label><input type="checkbox" value="ColdStorage" {...register("type")} /> ColdStorage</label>
+                <label><input type="checkbox" value="DryStorage" {...register("type")} /> DryStorage</label>
+            </div>
+    
+            <button className={styles.submitButton} type="submit">
                 {isEdit ? "Actualizar Inventario" : "Guardar Inventario"}
             </button>
         </form>

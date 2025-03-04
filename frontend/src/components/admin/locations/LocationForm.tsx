@@ -3,6 +3,7 @@ import { createLocation, updateLocation, adaptLocationToRequest } from "@api/adm
 import { useForm } from "react-hook-form"
 import { LocationFormData } from "@interfaces/admin/LocationTypes"
 import { useEffect } from "react"
+import styles from './LocationForm.module.css'
 
 interface Props {
     refetch: () => void
@@ -47,19 +48,20 @@ const LocationForm = ({ refetch, initialData, closeModal }: Props) => {
     const onSubmit = (data: LocationFormData) => {
         mutation.mutate(data)
     }
-
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <input placeholder="ID" {...register("ID")} disabled={isEdit} />
-            <input placeholder="Nombre" {...register("name")} />
-
-            <label><input type="checkbox" value="Location" {...register("locationType")} /> Location</label>
-            <label><input type="checkbox" value="Warehouse" {...register("locationType")} /> Warehouse</label>
-            <label><input type="checkbox" value="Restaurant" {...register("locationType")} /> Restaurant</label>
-            <label><input type="checkbox" value="DistributionCenter" {...register("locationType")} /> Centro de Distribución</label>
-
-            <button type="submit">
-                {isEdit ? "Actualizar Ubicación" : "Guardar Ubicación"}
+        <form className={styles.locationForm} onSubmit={handleSubmit(onSubmit)}>
+            <input className={styles.input} placeholder="ID" {...register("ID")} disabled={isEdit} />
+            <input className={styles.input} placeholder="Nombre" {...register("name")} />
+    
+            <div className={styles.checkboxGroup}>
+                <label><input type="checkbox" value="Location" {...register("locationType")} /> Location</label>
+                <label><input type="checkbox" value="Warehouse" {...register("locationType")} /> Warehouse</label>
+                <label><input type="checkbox" value="Restaurant" {...register("locationType")} /> Restaurant</label>
+                <label><input type="checkbox" value="DistributionCenter" {...register("locationType")} /> Centro de Distribucion</label>
+            </div>
+    
+            <button className={styles.submitButton} type="submit">
+                {isEdit ? "Actualizar Ubicacion" : "Guardar Ubicacion"}
             </button>
         </form>
     )
