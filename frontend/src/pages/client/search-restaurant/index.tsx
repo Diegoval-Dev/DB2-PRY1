@@ -7,8 +7,13 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+interface Restaurant {
+  nombre: string;
+}
+
 const Home = () => {
-  const [suppliers, setSuppliers] = useState([]);
+  const [suppliers, setSuppliers] = useState<Restaurant[]>([]);
+  const [selectedSupplier, setSelectedSupplier] = useState<Restaurant | null>(null);
 
   useEffect(() => {
     axios.get(`${API_URL}/location`)
@@ -23,13 +28,14 @@ const Home = () => {
       </header>
       <main className={styles.main}>
         <div className={styles.card}>
-          <Input 
+          <Input<Restaurant>
             className={styles.input} 
             placeholder="Ingrese el nombre del restaurante"
             suggestions={suppliers} 
+            onSelectSuggestion={setSelectedSupplier}
           />
           <div className={styles.buttonGroup}>
-            <Link to="/user/create-order">
+            <Link to="/user/create-order" state={{ supplier: selectedSupplier }}>
               <Button>Ingresar orden</Button>
             </Link>
           </div>

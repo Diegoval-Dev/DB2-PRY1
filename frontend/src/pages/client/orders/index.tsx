@@ -1,19 +1,44 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import Button from '@components/client/Button'
-import { Table } from '@components/client/Table'
-import { TableHeader } from '@components/client/TableHeader'
-import { TableBody } from '@components/client/TableBody'
-import { TableRow } from '@components/client/TableRow'
-import { TableCell } from '@components/client/TableCell'
-import styles from './styles.module.css'
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import Button from '@components/client/Button';
+import { Table } from '@components/client/Table';
+import { TableHeader } from '@components/client/TableHeader';
+import { TableBody } from '@components/client/TableBody';
+import { TableRow } from '@components/client/TableRow';
+import { TableCell } from '@components/client/TableCell';
+import styles from './styles.module.css';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface Order {
+  orderID: string;
+  fecha: string;
+  cantidad: number;
+  estado: string;
+  costoTotal: number;
+  restaurantName: string;
+}
 
 const Ordenes = () => {
-  const orders = [
-    { id: 'ORD-001', fecha: '25/02/2025', cantidad: 8, estado: 'Entregado', costo: 40.0 },
-    { id: 'ORD-002', fecha: '26/02/2025', cantidad: 5, estado: 'En proceso', costo: 35.0 },
-    { id: 'ORD-003', fecha: '27/02/2025', cantidad: 12, estado: 'Pendiente', costo: 75.0 },
-  ]
+  const location = useLocation();
+  const { supplier } = (location.state as { supplier?: { nombre: string } }) || {};
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    if (supplier && supplier.nombre) {
+      axios
+        .post(`${API_URL}/orders/restaurant`, {
+          restaurantName: supplier.nombre
+        })
+        .then(response => {
+          setOrders(response.data);
+        })
+        .catch(error => {
+          console.error('Error al obtener las órdenes:', error);
+        });
+    }
+  }, [supplier]);
 
   return (
     <div className={styles.pageContainer}>
@@ -38,12 +63,14 @@ const Ordenes = () => {
               <TableBody>
                 {orders.length > 0 ? (
                   orders.map(order => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.id}</TableCell>
+                    <TableRow key={order.orderID}>
+                      <TableCell>{order.orderID}</TableCell>
                       <TableCell>{order.fecha}</TableCell>
                       <TableCell>{order.cantidad}</TableCell>
                       <TableCell>{order.estado}</TableCell>
-                      <TableCell align="right">${order.costo.toFixed(2)}</TableCell>
+                      <TableCell align="right">
+                        ${order.costoTotal.toFixed(2)}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
@@ -57,7 +84,12 @@ const Ordenes = () => {
             </Table>
           </div>
           <div className={styles.actionsVertical}>
-            <Link to="/user/create-order">
+            {/* 
+              Al crear una nueva orden, 
+              podríamos querer mantener el mismo restaurante, 
+              así que le pasamos "supplier" como state si lo deseas.
+            */}
+            <Link to="/user/create-order" state={{ supplier }}>
               <Button>Nueva orden</Button>
             </Link>
             <Button variant="outline">Filtrar</Button>
@@ -68,7 +100,7 @@ const Ordenes = () => {
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Ordenes
+export default Ordenes;
