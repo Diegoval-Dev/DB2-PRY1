@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Supplier, SupplierResponse, SupplierCreate } from "@interfaces/admin/SupplierTypes";
+import { Supplier, SupplierResponse, SupplierCreate, Supply } from "@interfaces/admin/SupplierTypes";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -23,4 +23,8 @@ export const createSupplier = async (supplier: SupplierCreate): Promise<void> =>
     calificación: supplier.calificación,
     tipo: supplier.tipo
   })
+}
+
+export const updateSupplierSupplies = async (id: string, supplies: Supply[]): Promise<void> => {
+  await axios.put(`${API_URL}/suppliers/${id}/supplies`, { supplies })
 }
