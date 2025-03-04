@@ -20,19 +20,19 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="suppliers" element={<SuppliersPage />} />
-        <Route path="ingredients" element={<IngredientsPage />} />
-        <Route path="orders" element={<OrdersPage />} />
-        <Route path="inventory" element={<InventoryPage />} />
-        <Route path="locations" element={<LocationsPage />} />
-        <Route path="routes" element={<RoutesPage />} />
-        <Route path="categories" element={<CategoriesPage />} />
-        <Route path="/user" element={<UserHome />} />
-        <Route path="/user/create-order" element={<CreateOrder />} />
-        <Route path="/user/summary-order" element={<SummaryOrder />} />
-        <Route path="/user/orders" element={<Orders />} />
+      <Route path="dashboard" element={<AdminDashboard />} />
+      <Route path="suppliers" element={<SuppliersPage />} />
+      <Route path="ingredients" element={<IngredientsPage />} />
+      <Route path="orders" element={<OrdersPage />} />
+      <Route path="inventory" element={<InventoryPage />} />
+      <Route path="locations" element={<LocationsPage />} />
+      <Route path="routes" element={<RoutesPage />} />
+      <Route path="categories" element={<CategoriesPage />} />
       </Route>
+      <Route path="/user" element={<UserHome />} />
+      <Route path="/user/create-order" element={<CreateOrder />} />
+      <Route path="/user/summary-order" element={<SummaryOrder />} />
+      <Route path="/user/orders" element={<Orders />} />
     </Routes>
   )
 }

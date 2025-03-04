@@ -1,0 +1,66 @@
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.category-item:hover {
+  background-color: #f3f4f6;
+}
+
+.category-name {
+  font-weight: bold;
+  color: #374151;
+}
+
+.category-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.category-button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.category-button.edit {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.category-button.edit:hover {
+  background-color: #2563eb;
+}
+
+.category-button.delete {
+  background-color: #ef4444;
+  color: white;
+}
+
+.category-button.delete:hover {
+  background-color: #dc2626;
+}

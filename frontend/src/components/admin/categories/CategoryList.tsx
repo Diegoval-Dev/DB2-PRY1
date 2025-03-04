@@ -21,16 +21,19 @@ const CategoryList = ({ categories, isLoading, error, onEdit, refetch }: Props) 
     if (error) return <p>Error cargando categorías.</p>
 
     return (
-        <ul>
+        <ul className="category-list">
             {categories.map(cat => (
-                <li key={cat.id}>
-                    {cat.nombre}
-                    <button onClick={() => onEdit(cat)}>Editar</button>
-                    <button onClick={() => deleteMutation.mutate(cat.id)}>Eliminar</button>
+                <li className="category-item" key={cat.id}>
+                    <span className="category-name">{cat.nombre}</span>
+                    <div className="category-actions">
+                        <button className="category-button edit" onClick={() => onEdit(cat)}>Editar</button>
+                        <button className="category-button delete" onClick={() => deleteMutation.mutate(cat.id)}>Eliminar</button>
+                    </div>
                 </li>
             ))}
         </ul>
     )
+    
 }
 
 export default CategoryList

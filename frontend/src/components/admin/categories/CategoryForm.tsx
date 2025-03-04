@@ -3,6 +3,7 @@ import { createCategory, updateCategory } from "@api/admin/categoriesApi"
 import { useForm } from "react-hook-form"
 import { useEffect } from "react"
 import { Category } from "@interfaces/admin/CategoryTypes"
+import "./CategoryForm.css"
 
 interface Props {
     refetch: () => void
@@ -41,14 +42,14 @@ const CategoryForm = ({ refetch, initialData, closeModal }: Props) => {
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <input placeholder="ID" {...register("id")} disabled={isEdit} />
-            <input placeholder="Nombre" {...register("nombre")} />
-            <button type="submit">
-                {isEdit ? "Actualizar Categoría" : "Guardar Categoría"}
+        <form className="category-form" onSubmit={handleSubmit(onSubmit)}>
+            <input className="category-input" placeholder="ID" {...register("id")} disabled={isEdit} />
+            <input className="category-input" placeholder="Nombre" {...register("nombre")} />
+            <button className="category-button" type="submit">
+                {isEdit ? "Actualizar Categoria" : "Guardar Categoria"}
             </button>
         </form>
-    )
+    )    
 }
 
 export default CategoryForm
