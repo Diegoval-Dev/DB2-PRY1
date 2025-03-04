@@ -9,6 +9,7 @@ import orderRoutes from "./routes/orders.routes";
 import inventoryRoutes from "./routes/inventory.routes";
 import locationsRoutes from "./routes/locations.routes";
 import relationship from "./routes/relationships.routes";
+import categories from "./routes/categories.routes";
 
 dotenv.config();
 
@@ -24,5 +25,7 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/locations", locationsRoutes);
 app.use("/api/routes", locationsRoutes);
 app.use("/api/relationships", relationship);
+app.use("/api/categories", categories);
+
 
 export default app;

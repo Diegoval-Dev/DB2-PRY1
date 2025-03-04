@@ -1,96 +1,122 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { createIngredient } from "@api/admin/ingredientsApi"
-import { useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import { ingredientSchema } from "@validations/admin/ingredientSchema"
-import { CreateIngredientRequest } from "@interfaces/admin/IngredientTypes"
+import { fetchInventories } from "@api/admin/inventoryApi"
+import { fetchCategories } from "@api/admin/categoriesApi"
+import { useForm, useFieldArray } from "react-hook-form"
+import { CreateIngredientRequest, StorageRequest } from "@interfaces/admin/IngredientTypes"
 
 interface Props {
-  refetch: () => void
+    refetch: () => void
 }
 
 interface IngredientFormData {
-  ID: string
-  name: string
-  category: string
-  price: number
-  quantity: number
-  expirationDate: string
-  type: (string | undefined)[]
+    ID: string
+    name: string
+    price: number
+    expirationDate: string
+    type: string[]
+    categoryId: string
+    storages: StorageRequest[]
 }
 
 const IngredientForm = ({ refetch }: Props) => {
-  const mutation = useMutation({
-    mutationFn: createIngredient,
-    onSuccess: () => {
-      refetch()
-      reset()
-    },
-    onError: () => {
-      alert("Error al crear insumo")
+    const mutation = useMutation({
+        mutationFn: createIngredient,
+        onSuccess: () => {
+            refetch()
+            reset()
+        },
+        onError: () => {
+            alert("Error al crear insumo")
+        }
+    })
+
+    const { data: inventories = [] } = useQuery({
+        queryKey: ["inventories"],
+        queryFn: fetchInventories
+    })
+
+    const { data: categories = [] } = useQuery({
+        queryKey: ["categories"],
+        queryFn: fetchCategories
+    })
+
+    const { register, handleSubmit, reset, control } = useForm<IngredientFormData>({
+        defaultValues: {
+            ID: "",
+            name: "",
+            price: 0,
+            expirationDate: "",
+            type: [],
+            categoryId: "",
+            storages: [{ inventoryId: "", cantidad: 0 }]
+        }
+    })
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "storages"
+    })
+
+    const onSubmit = (data: IngredientFormData) => {
+        const adapted: CreateIngredientRequest = {
+            id: data.ID,
+            nombre: data.name,
+            categoría: "", // Siempre vacío, lo llena el backend al buscar la categoría
+            precio: data.price,
+            fechaCaducidad: data.expirationDate,
+            tipo: data.type,
+            categoryId: data.categoryId,
+            storages: data.storages.filter(storage => storage.inventoryId && storage.cantidad > 0)
+        }
+
+        mutation.mutate(adapted)
     }
-  })
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = useForm<IngredientFormData>({
-    resolver: yupResolver(ingredientSchema),
-    defaultValues: {
-      ID: "",
-      name: "",
-      category: "",
-      price: 0,
-      quantity: 0,
-      expirationDate: "",
-      type: []
-    }
-  })
+    return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <input type="text" placeholder="ID" {...register("ID")} />
+            <input type="text" placeholder="Nombre" {...register("name")} />
+            <input type="number" placeholder="Precio" {...register("price")} />
+            <input type="date" placeholder="Fecha de Caducidad" {...register("expirationDate")} />
 
-  const onSubmit = (data: IngredientFormData) => {
-    const adapted: CreateIngredientRequest = {
-        id: data.ID,
-        nombre: data.name,
-        categoría: data.category,
-        precio: data.price,
-        cantidad: data.quantity,
-        fechaCaducidad: data.expirationDate,
-        tipo: data.type.filter((t): t is string => !!t) // quita undefined
-    }
+            <div>
+                <label><input type="checkbox" value="Ingredient" {...register("type")} /> Ingredient</label>
+                <label><input type="checkbox" value="Perishable" {...register("type")} /> Perishable</label>
+                <label><input type="checkbox" value="Organic" {...register("type")} /> Organic</label>
+            </div>
 
-    mutation.mutate(adapted)
-}
+            <select {...register("categoryId")}>
+                <option value="">Seleccione Categoría</option>
+                {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                        {category.nombre}
+                    </option>
+                ))}
+            </select>
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input type="text" placeholder="ID" {...register("ID")} />
-      <p>{errors.ID?.message}</p>
+            <h3>Almacenamiento</h3>
+            {fields.map((field, index) => (
+                <div key={field.id} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <select {...register(`storages.${index}.inventoryId` as const)}>
+                        <option value="">Seleccione Inventario</option>
+                        {inventories.map(inventory => (
+                            <option key={inventory.ID} value={inventory.ID}>
+                                {inventory.ID} - {inventory.location}
+                            </option>
+                        ))}
+                    </select>
+                    <input type="number" placeholder="Cantidad" {...register(`storages.${index}.cantidad` as const)} />
+                    <button type="button" onClick={() => remove(index)}>Eliminar</button>
+                </div>
+            ))}
+            <button type="button" onClick={() => append({ inventoryId: "", cantidad: 0 })}>
+                Agregar Inventario
+            </button>
 
-      <input type="text" placeholder="Nombre" {...register("name")} />
-      <p>{errors.name?.message}</p>
-
-      <input type="text" placeholder="Categoria" {...register("category")} />
-      <p>{errors.category?.message}</p>
-
-      <input type="number" placeholder="Precio" {...register("price")} />
-      <p>{errors.price?.message}</p>
-
-      <input type="number" placeholder="Cantidad" {...register("quantity")} />
-      <p>{errors.quantity?.message}</p>
-
-      <input type="date" placeholder="Fecha de Caducidad" {...register("expirationDate")} />
-      <p>{errors.expirationDate?.message}</p>
-
-      <label><input type="checkbox" value="Ingredient" {...register("type")} /> Ingredient</label>
-      <label><input type="checkbox" value="Perishable" {...register("type")} /> Perishable</label>
-      <label><input type="checkbox" value="Organic" {...register("type")} /> Organic</label>
-      <p>{errors.type?.message}</p>
-
-      <button type="submit" disabled={mutation.isPending}>Guardar Insumo</button>
-    </form>
-  )
+            <button type="submit" disabled={mutation.isPending}>Guardar Insumo</button>
+        </form>
+    )
 }
 
 export default IngredientForm

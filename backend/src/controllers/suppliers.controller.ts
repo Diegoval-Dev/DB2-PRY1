@@ -62,7 +62,7 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
     return;
   }
 
-  const labels = tipo.map(t => `\`${t}\``).join(":"); // Ejemplo: `Supplier`:`Distributor`
+  const labels = tipo.map(t => `\`${t}\``).join(":"); 
 
   const query = `
     CREATE (s:${labels} {id: $id, nombre: $nombre, ubicación: $ubicación, calificación: $calificación})
@@ -109,5 +109,62 @@ export const deleteSupplier = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ error: "Error eliminando proveedor" });
   } finally {
     await session.close();
+  }
+};
+
+export const updateSupplies = async (req: Request, res: Response) => {
+  const session = driver.session();
+  const { id } = req.params;
+  const { supplies } = req.body;
+
+  if (!Array.isArray(supplies) || supplies.length === 0) {
+      res.status(400).json({ error: "Debe especificar al menos un producto suministrado" });
+      return;
+  }
+
+  try {
+
+      const supplierCheck = await session.run(
+          `MATCH (s:Supplier {id: $id}) RETURN s`,
+          { id }
+      );
+      if (supplierCheck.records.length === 0) {
+          res.status(404).json({ error: "Proveedor no encontrado" });
+          return;
+      }
+
+      await session.run(
+          `MATCH (s:Supplier {id: $id})-[r:SUPPLIES]->(:Ingredient) DELETE r`,
+          { id }
+      );
+
+      for (const supply of supplies) {
+          const { ingredientId, cantidad, fecha } = supply;
+
+          const ingredientCheck = await session.run(
+              `MATCH (i:Ingredient {id: $ingredientId}) RETURN i`,
+              { ingredientId }
+          );
+          if (ingredientCheck.records.length === 0) {
+              res.status(400).json({ error: `El ingrediente con ID ${ingredientId} no existe` });
+              return;
+          }
+
+          await session.run(
+              `
+              MATCH (s:Supplier {id: $id})
+              MATCH (i:Ingredient {id: $ingredientId})
+              CREATE (s)-[:SUPPLIES {cantidad: toInteger($cantidad), fecha: date($fecha)}]->(i)
+              `,
+              { id, ingredientId, cantidad, fecha }
+          );
+      }
+
+      res.json({ message: "Relaciones de suministro actualizadas correctamente" });
+  } catch (error) {
+      console.error("Error actualizando suministros:", error);
+      res.status(500).json({ error: "Error actualizando suministros" });
+  } finally {
+      await session.close();
   }
 };

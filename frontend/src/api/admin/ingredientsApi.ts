@@ -18,6 +18,5 @@ export const fetchIngredients = async (): Promise<Ingredient[]> => {
 }
 
 export const createIngredient = async (ingredient: CreateIngredientRequest): Promise<void> => {
-  console.log("INGREDIENT", ingredient)
   await axios.post(`${API_URL}/ingredients`, ingredient)
 }
