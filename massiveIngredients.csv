@@ -1,0 +1,4 @@
+id,nombre,categoria,precio,fechaCaducidad,tipo,categoryId,inventoryId,cantidad
+MS1,Tomate,Verduras,2.5,2025-03-28,"Ingredient,Perishable",CAT0001,INV0001,50
+MS1,Tomate,Verduras,2.5,2025-03-28,"Ingredient,Perishable",CAT0001,INV0002,50
+MS3,Lechuga,Verduras,1.8,2025-04-15,"Ingredient,Organic",CAT0001,INV0003,100
