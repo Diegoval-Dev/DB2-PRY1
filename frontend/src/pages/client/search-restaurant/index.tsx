@@ -38,6 +38,9 @@ const Home = () => {
             <Link to="/user/create-order" state={{ supplier: selectedSupplier }}>
               <Button>Ingresar orden</Button>
             </Link>
+            <Link to="/user/orders" state={{ supplier: selectedSupplier }}>
+              <Button>Ver ordenes</Button>
+            </Link>
           </div>
         </div>
       </main>

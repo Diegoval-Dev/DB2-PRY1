@@ -5,6 +5,7 @@
   justify-content: center;
   min-height: 100vh;
   background-color: #f8f8f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .header {
@@ -56,6 +57,9 @@
 
 .buttonGroup {
   margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 button {

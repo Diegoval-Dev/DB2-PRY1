@@ -92,7 +92,6 @@ const Ordenes = () => {
             <Link to="/user/create-order" state={{ supplier }}>
               <Button>Nueva orden</Button>
             </Link>
-            <Button variant="outline">Filtrar</Button>
             <Link to="/user">
               <Button variant="outline">Salir</Button>
             </Link>
