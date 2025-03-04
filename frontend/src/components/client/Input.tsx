@@ -1,12 +1,26 @@
+// Input.tsx
 import React, { useState } from 'react';
 import './styles/Input.css';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  suggestions?: Array<{ nombre: string }>;
+// Tipo base para sugerencias: cualquier objeto que tenga al menos "nombre"
+interface BaseSuggestion {
+  nombre: string;
 }
 
-const Input: React.FC<InputProps> = ({ suggestions = [], ...props }) => {
-  const [filteredSuggestions, setFilteredSuggestions] = useState<Array<{ nombre: string }>>([]);
+interface InputProps<T extends BaseSuggestion> extends React.InputHTMLAttributes<HTMLInputElement> {
+  suggestions?: T[];
+  onSelectSuggestion?: (suggestion: T) => void;
+  // Opcionalmente, puedes permitir especificar qué propiedad mostrar (por defecto "nombre")
+  displayField?: keyof T;
+}
+
+const Input = <T extends BaseSuggestion>({
+  suggestions = [],
+  onSelectSuggestion,
+  displayField = 'nombre',
+  ...props
+}: InputProps<T>) => {
+  const [filteredSuggestions, setFilteredSuggestions] = useState<T[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
@@ -16,9 +30,10 @@ const Input: React.FC<InputProps> = ({ suggestions = [], ...props }) => {
 
     if (value.length > 0) {
       const filtered = suggestions.filter(suggestion =>
-        suggestion.nombre.toLowerCase().includes(value.toLowerCase())
+        String(suggestion[displayField])
+          .toLowerCase()
+          .includes(value.toLowerCase())
       );
-
       setFilteredSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
     } else {
@@ -26,8 +41,11 @@ const Input: React.FC<InputProps> = ({ suggestions = [], ...props }) => {
     }
   };
 
-  const handleSelect = (nombre: string) => {
-    setInputValue(nombre);
+  const handleSelect = (suggestion: T) => {
+    if (onSelectSuggestion) {
+      onSelectSuggestion(suggestion);
+    }
+    setInputValue(String(suggestion[displayField]));
     setShowSuggestions(false);
   };
 
@@ -44,10 +62,10 @@ const Input: React.FC<InputProps> = ({ suggestions = [], ...props }) => {
           {filteredSuggestions.map((suggestion, index) => (
             <li 
               key={index} 
-              onClick={() => handleSelect(suggestion.nombre)}
+              onClick={() => handleSelect(suggestion)}
               className="suggestion-item"
             >
-              {suggestion.nombre}
+              {String(suggestion[displayField])}
             </li>
           ))}
         </ul>
