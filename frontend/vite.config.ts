@@ -10,6 +10,8 @@ export default defineConfig({
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@api': path.resolve(__dirname, 'src/api'),
       '@interfaces': path.resolve(__dirname, 'src/interfaces'),
+      '@validations': path.resolve(__dirname, 'src/validations'),
+      '@layouts': path.resolve(__dirname, 'src/layouts'),
     },
   },
 })

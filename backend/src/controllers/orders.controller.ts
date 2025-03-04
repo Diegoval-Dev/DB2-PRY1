@@ -3,18 +3,39 @@ import { driver } from "../config/db";
 import { Session, Transaction } from "neo4j-driver";
 
 export const getAllOrders = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
+  const session = driver.session()
+
   try {
-    const result = await session.run(`MATCH (o:Order) RETURN o`);
-    const orders = result.records.map(record => record.get("o").properties);
-    res.json(orders);
+    const result = await session.run(`
+      MATCH (o)
+      WHERE o:Order OR o:Urgent OR o:Recurrent
+      RETURN o, labels(o) AS labels
+    `)
+
+    const orders = result.records.map(record => {
+      const properties = record.get("o").properties
+      const labels = record.get("labels")
+
+      const tipo: string[] = labels.filter((label: string) => ["Order", "Urgent", "Recurrent"].includes(label))
+
+      return {
+        id: properties.id,
+        fecha: properties.fecha_orden,
+        total: properties.costo_total,
+        tipo,
+        cantidad: properties.cantidad,
+        estado: properties.estado
+      }
+    })
+
+    res.json(orders)
   } catch (error) {
-    console.error("Error obteniendo órdenes:", error);
-    res.status(500).json({ error: "Error obteniendo órdenes" });
+    console.error("Error obteniendo ordenes:", error)
+    res.status(500).json({ error: "Error obteniendo ordenes" })
   } finally {
-    await session.close();
+    await session.close()
   }
-};
+}
 
 export const getOrderById = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session();

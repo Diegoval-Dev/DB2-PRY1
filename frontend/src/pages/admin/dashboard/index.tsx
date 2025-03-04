@@ -1,29 +1,12 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import Dashboard from "@components/admin/dashboard/Dashboard"
 
-const API_URL = import.meta.env.VITE_API_URL;
+const HomePage = () => {
+    return (
+        <div>
+            <h1>Dashboard General</h1>
+            <Dashboard />
+        </div>
+    )
+}
 
-const Suppliers = () => {
-  const [suppliers, setSuppliers] = useState([]);
-
-  useEffect(() => {
-    axios.get(`${API_URL}/suppliers`)
-      .then(response => setSuppliers(response.data))
-      .catch(error => console.error("Error cargando proveedores:", error));
-  }, []);
-
-  return (
-    <div>
-      <h1>Proveedores</h1>
-      <ul>
-        {suppliers.map((supplier: any) => (
-          <li key={supplier.ID}>
-            {supplier.nombre} - {supplier.ubicación} (Calificación: {supplier.calificación})
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default Suppliers;
+export default HomePage
