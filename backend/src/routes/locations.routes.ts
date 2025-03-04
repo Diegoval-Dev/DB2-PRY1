@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createRoute, getAllRoutes } from "../controllers/routes.controller";
+import { getAllLocations, createLocation } from "../controllers/location.controller";
 
 const router = Router();
 
-router.post("/", createRoute);
-router.get("/", getAllRoutes);
+router.post("/", createLocation);
+router.get("/", getAllLocations);
 
 export default router;

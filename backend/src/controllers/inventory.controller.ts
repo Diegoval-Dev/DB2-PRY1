@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { driver } from "../config/db";
-
+//no esta regresando los tipos completos
 export const getAllInventories = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session()
 
@@ -19,7 +19,6 @@ export const getAllInventories = async (req: Request, res: Response): Promise<vo
 
       return {
         id: properties.id,
-        nombre: properties.nombre,
         descripcion: properties.descripcion,
         capacidad: properties.capacidad,
         ubicacion: properties.ubicación,
@@ -56,18 +55,44 @@ export const getInventoryById = async (req: Request, res: Response): Promise<voi
 
 export const createInventory = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session();
-  const { ID, ubicación, capacidad, cantidadAlmacenada } = req.body;
+
+  const { id, capacidad, cantidadInsumo, tipo, ubicacion } = req.body;
+
   try {
-    await session.run(
-      `CREATE (:Inventory {ID: $ID, ubicación: $ubicación, capacidad: $capacidad, cantidadAlmacenada: $cantidadAlmacenada})`,
-      { ID, ubicación, capacidad, cantidadAlmacenada }
-    );
-    res.json({ message: "Inventario creado" });
+      const locationResult = await session.run(
+          `MATCH (loc:Location {id: $ubicacion}) RETURN loc.nombre AS nombre`,
+          { ubicacion }
+      )
+
+      if (locationResult.records.length === 0) {
+          res.status(400).json({ error: "Ubicación no encontrada" })
+          return
+      }
+
+      const nombreUbicacion = locationResult.records[0].get("nombre")
+
+      await session.run(
+          `
+          CREATE (inv:Inventory {id: $id, capacidad: toFloat($capacidad), cantidad_insumos: toFloat($cantidadInsumo), tipo: $tipo, ubicación: $ubicacion})
+          `,
+          { id, capacidad, cantidadInsumo, tipo, ubicacion: nombreUbicacion }
+      )
+
+      await session.run(
+          `
+          MATCH (inv:Inventory {id: $id})
+          MATCH (loc:Location {id: $ubicacion})
+          CREATE (inv)-[:LOCATED_IN {ciudad: loc.nombre}]->(loc)
+          `,
+          { id, ubicacion }
+      )
+
+      res.json({ message: "Inventario creado" });
   } catch (error) {
-    console.error("Error creando inventario:", error);
-    res.status(500).json({ error: "Error creando inventario" });
+      console.error("Error creando inventario:", error);
+      res.status(500).json({ error: "Error creando inventario" });
   } finally {
-    await session.close();
+      await session.close();
   }
 };
 

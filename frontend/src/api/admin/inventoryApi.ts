@@ -18,10 +18,11 @@ export const fetchInventories = async (): Promise<Inventory[]> => {
 
 export const createInventory = async (inventory: Inventory): Promise<void> => {
   await axios.post(`${API_URL}/inventory`, {
-    id: inventory.ID,
-    ubicacion: inventory.location,
-    capacidad: inventory.capacity,
-    cantidadInsumo: inventory.supplyQuantity,
-    tipo: inventory.type
+      id: inventory.ID,
+      capacidad: inventory.capacity,
+      cantidadInsumo: inventory.supplyQuantity,
+      tipo: inventory.type,
+      ubicacion: inventory.location
   })
 }
+

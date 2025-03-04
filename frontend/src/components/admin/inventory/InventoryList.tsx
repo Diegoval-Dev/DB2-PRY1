@@ -14,7 +14,7 @@ const InventoryList = ({ inventories, isLoading, error }: Props) => {
     <ul>
       {inventories.map(inventory => (
         <li key={inventory.ID}>
-          {inventory.location} - Capacidad: {inventory.capacity} - Insumos: {inventory.supplyQuantity} - Tipos: {inventory.type.join(", ")}
+          Ubicacion: {inventory.location} - Capacidad: {inventory.capacity} - Insumos: {inventory.supplyQuantity} - Tipos: {inventory.type.join(", ")}
         </li>
       ))}
     </ul>
