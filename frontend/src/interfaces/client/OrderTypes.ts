@@ -1,5 +1,5 @@
 export interface OrderItem {
-  id: number
+  id: string
   ingrediente: string
   caducidad: string
   cantidad: number
