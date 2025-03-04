@@ -6,6 +6,7 @@ import { SupplierType, SupplierCreate, Supply } from "@interfaces/admin/Supplier
 import { Ingredient } from "@interfaces/admin/IngredientTypes"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
+import styles from './SupplierForm.module.css'
 
 interface Props {
     refetch: () => void
@@ -118,21 +119,24 @@ const SupplierForm = ({ refetch, initialData, closeModal }: Props) => {
         await updateSupplierSupplies(supplierId, adaptedSupplies)
     }
 
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="text" placeholder="ID" {...register("ID")} disabled={isEdit} />
-            <input type="text" placeholder="Nombre" {...register("name")} />
-            <input type="text" placeholder="Ubicacion" {...register("location")} />
-            <input type="number"step="any" placeholder="Calificacion (1-5)" {...register("rating")} />
-
-            <label><input type="checkbox" value="Supplier" {...register("type")} /> Supplier</label>
-            <label><input type="checkbox" value="Distributor" {...register("type")} /> Distributor</label>
-            <label><input type="checkbox" value="Wholesaler" {...register("type")} /> Wholesaler</label>
-
-            <h3>Productos que provee</h3>
+        <form className={styles.supplierForm} onSubmit={handleSubmit(onSubmit)}>
+            <input className={styles.input} type="text" placeholder="ID" {...register("ID")} disabled={isEdit} />
+            <input className={styles.input} type="text" placeholder="Nombre" {...register("name")} />
+            <input className={styles.input} type="text" placeholder="Ubicacion" {...register("location")} />
+            <input className={styles.input} type="number" step="any" placeholder="Calificacion (1-5)" {...register("rating")} />
+    
+            <div className={styles.checkboxGroup}>
+                <label><input type="checkbox" value="Supplier" {...register("type")} /> Supplier</label>
+                <label><input type="checkbox" value="Distributor" {...register("type")} /> Distributor</label>
+                <label><input type="checkbox" value="Wholesaler" {...register("type")} /> Wholesaler</label>
+            </div>
+    
+            <h3 className={styles.sectionTitle}>Productos que provee</h3>
             {fields.map((field, index) => (
-                <div key={field.id} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <select {...register(`supplies.${index}.ingredientId` as const)}>
+                <div className={styles.supplyRow} key={field.id}>
+                    <select className={styles.select} {...register(`supplies.${index}.ingredientId` as const)}>
                         <option value="">Seleccione Ingrediente</option>
                         {ingredients.map(ingredient => (
                             <option key={ingredient.ID} value={ingredient.ID}>
@@ -140,20 +144,22 @@ const SupplierForm = ({ refetch, initialData, closeModal }: Props) => {
                             </option>
                         ))}
                     </select>
-                    <input type="number" placeholder="Cantidad" {...register(`supplies.${index}.cantidad` as const)} />
-                    <input type="date" placeholder="Fecha de suministro" {...register(`supplies.${index}.fecha` as const)} />
-                    <button type="button" onClick={() => remove(index)}>Eliminar</button>
+                    <input className={styles.input} type="number" placeholder="Cantidad" {...register(`supplies.${index}.cantidad` as const)} />
+                    <input className={styles.input} type="date" placeholder="Fecha de suministro" {...register(`supplies.${index}.fecha` as const)} />
+                    <button className={styles.deleteButton} type="button" onClick={() => remove(index)}>Eliminar</button>
                 </div>
             ))}
-            <button type="button" onClick={() => append({ ingredientId: "", cantidad: 0, fecha: "" })}>
+    
+            <button className={styles.addButton} type="button" onClick={() => append({ ingredientId: "", cantidad: 0, fecha: "" })}>
                 Agregar Producto
             </button>
-
-            <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+    
+            <button className={styles.submitButton} type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                 {isEdit ? "Actualizar Proveedor" : "Guardar Proveedor"}
             </button>
         </form>
     )
+    
 }
 
 export default SupplierForm

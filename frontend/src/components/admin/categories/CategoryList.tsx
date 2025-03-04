@@ -1,6 +1,7 @@
 import { Category } from "@interfaces/admin/CategoryTypes"
 import { deleteCategory } from "@api/admin/categoriesApi"
 import { useMutation } from "@tanstack/react-query"
+import styles from './CategoryList.module.css'
 
 interface Props {
     categories: Category[]
@@ -21,13 +22,13 @@ const CategoryList = ({ categories, isLoading, error, onEdit, refetch }: Props) 
     if (error) return <p>Error cargando categorías.</p>
 
     return (
-        <ul className="category-list">
+        <ul className={styles.categoryList}>
             {categories.map(cat => (
-                <li className="category-item" key={cat.id}>
-                    <span className="category-name">{cat.nombre}</span>
-                    <div className="category-actions">
-                        <button className="category-button edit" onClick={() => onEdit(cat)}>Editar</button>
-                        <button className="category-button delete" onClick={() => deleteMutation.mutate(cat.id)}>Eliminar</button>
+                <li className={styles.categoryItem} key={cat.id}>
+                    <span className={styles.categoryName}>{cat.nombre}</span>
+                    <div className={styles.categoryActions}>
+                        <button className={`${styles.categoryButton} ${styles.edit}`} onClick={() => onEdit(cat)}>Editar</button>
+                        <button className={`${styles.categoryButton} ${styles.delete}`} onClick={() => deleteMutation.mutate(cat.id)}>Eliminar</button>
                     </div>
                 </li>
             ))}

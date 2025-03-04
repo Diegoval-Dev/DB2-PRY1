@@ -1,4 +1,4 @@
-.category-list {
+.inventoryList {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -13,32 +13,32 @@
   width: 100%;
 }
 
-.category-item {
+.inventoryItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+  padding: 12px;
   transition: background-color 0.2s;
 }
 
-.category-item:hover {
+.inventoryItem:hover {
   background-color: #f3f4f6;
 }
 
-.category-name {
+.inventoryInfo {
   font-weight: bold;
   color: #374151;
 }
 
-.category-actions {
+.actions {
   display: flex;
   gap: 8px;
 }
 
-.category-button {
+.actionButton {
   padding: 8px 12px;
   font-size: 14px;
   border: none;
@@ -47,20 +47,20 @@
   transition: background-color 0.2s, transform 0.1s;
 }
 
-.category-button.edit {
+.editButton {
   background-color: #3b82f6;
   color: white;
 }
 
-.category-button.edit:hover {
+.editButton:hover {
   background-color: #2563eb;
 }
 
-.category-button.delete {
+.deleteButton {
   background-color: #ef4444;
   color: white;
 }
 
-.category-button.delete:hover {
+.deleteButton:hover {
   background-color: #dc2626;
 }

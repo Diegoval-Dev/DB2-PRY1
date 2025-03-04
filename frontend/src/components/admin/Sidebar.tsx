@@ -1,22 +1,21 @@
 import { Link } from "react-router-dom"
+import styles from './Sidebar.module.css'
 
 const Sidebar = () => {
   return (
-    <nav style={{ width: "250px", backgroundColor: "#f4f4f4", padding: "20px" }}>
-      <h3>Admin Menu</h3>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {/* <li><Link to="/admin/dashboard">Dashboard</Link></li> */}
-        <li><Link to="/admin/locations">Ubicaciones</Link></li>
-        <li><Link to="/admin/suppliers">Proveedores</Link></li>
-        <li><Link to="/admin/inventory">Inventario</Link></li>
-        <li><Link to="/admin/categories">Categorias</Link></li>
-        <li><Link to="/admin/ingredients">Insumos</Link></li>
-        <li><Link to="/admin/orders">Ordenes</Link></li>
-        <li><Link to="/admin/routes">Rutas</Link></li>
-        <li><a href="/">Salir al sitio publico</a></li>
-      </ul>
+    <nav className={styles.sidebar}>
+        <h3 className={styles.title}>Admin Menu</h3>
+        <ul className={styles.menu}>
+            <li><Link className={styles.link} to="/admin/locations">Ubicaciones</Link></li>
+            <li><Link className={styles.link} to="/admin/suppliers">Proveedores</Link></li>
+            <li><Link className={styles.link} to="/admin/inventory">Inventario</Link></li>
+            <li><Link className={styles.link} to="/admin/categories">Categorias</Link></li>
+            <li><Link className={styles.link} to="/admin/ingredients">Insumos</Link></li>
+            <li><Link className={styles.link} to="/admin/orders">Ordenes</Link></li>
+            <li><a className={styles.link} href="/">Salir al sitio publico</a></li>
+        </ul>
     </nav>
-  )
+)
 }
 
 export default Sidebar

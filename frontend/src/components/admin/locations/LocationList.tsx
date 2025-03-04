@@ -1,7 +1,7 @@
 import { Location } from "@interfaces/admin/LocationTypes"
 import { deleteLocation } from "@api/admin/locationsApi"
 import { useMutation } from "@tanstack/react-query"
-
+import styles from './LocationList.module.css'
 interface Props {
     locations: Location[]
     isLoading: boolean
@@ -21,12 +21,26 @@ const LocationList = ({ locations, isLoading, error, onEdit, refetch }: Props) =
     if (error) return <p>Error cargando ubicaciones.</p>
 
     return (
-        <ul>
+        <ul className={styles.locationList}>
             {locations.map(location => (
-                <li key={location.id}>
-                    {location.nombre} - Tipos: {location.tipoUbicacion.join(", ")}
-                    <button onClick={() => onEdit(location)}>Editar</button>
-                    <button onClick={() => deleteMutation.mutate(location.id)}>Eliminar</button>
+                <li className={styles.locationItem} key={location.id}>
+                    <span className={styles.locationInfo}>
+                        {location.nombre} - Tipos: {location.tipoUbicacion.join(", ")}
+                    </span>
+                    <div className={styles.actions}>
+                        <button
+                            className={`${styles.actionButton} ${styles.editButton}`}
+                            onClick={() => onEdit(location)}
+                        >
+                            Editar
+                        </button>
+                        <button
+                            className={`${styles.actionButton} ${styles.deleteButton}`}
+                            onClick={() => deleteMutation.mutate(location.id)}
+                        >
+                            Eliminar
+                        </button>
+                    </div>
                 </li>
             ))}
         </ul>
