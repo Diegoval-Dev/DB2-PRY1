@@ -25,14 +25,12 @@ export const createRoute = async (req: Request, res: Response) => {
 
 export const getAllRoutes = async (req: Request, res: Response) => {
   const session = driver.session();
-
   try {
       const query = `
           MATCH (r:Route)-[:CONNECTS]->(o:Location), (r)-[:CONNECTS]->(d:Location)
           RETURN r.id AS id, o.nombre AS origen, d.nombre AS destino, r.distancia AS distancia, r.tipoTransporte AS tipoTransporte
       `;
       const result = await session.run(query);
-
       const routes = result.records.map(record => ({
           id: record.get("id"),
           origen: record.get("origen"),

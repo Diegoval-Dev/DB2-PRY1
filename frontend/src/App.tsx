@@ -8,6 +8,7 @@ import IngredientsPage from "@pages/admin/ingredients"
 import OrdersPage from "@pages/admin/orders"
 import InventoryPage from "@pages/admin/inventory"
 import LocationsPage from "@pages/admin/locations"
+import RoutesPage from "@pages/admin/routes"
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="orders" element={<OrdersPage />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="locations" element={<LocationsPage />} />
+        <Route path="routes" element={<RoutesPage />} />
       </Route>
     </Routes>
   )
