@@ -65,7 +65,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         fechaOrden: date($fechaOrden),
         estado: $estado,
         cantidad: 0,
-        costoTotal: 0.0
+        costo_total: 0.0
       })
       `,
       { orderID, orderType, fechaOrden, estado }
@@ -240,7 +240,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     await txc.run(
       `
       MATCH (o:Order {id: $orderID})
-      SET o.costoTotal = $costoTotal,
+      SET o.costo_total = $costoTotal,
           o.cantidad = $cantidadTotal
       `,
       { orderID, costoTotal, cantidadTotal }
@@ -299,3 +299,86 @@ export const deleteOrder = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
+export const getOrderFromRestaurant = async (req: Request, res: Response): Promise<void> => {
+  const session = driver.session();
+  const { restaurantName } = req.body;
+
+  if (!restaurantName) {
+    res.status(400).json({ error: "El nombre del restaurante es obligatorio" });
+    return;
+  }
+
+  try {
+    // First, verify restaurant existence
+    const restaurantCheck = await session.run(
+      `
+      MATCH (r:Restaurant)
+      WHERE toLower(r.nombre) CONTAINS toLower($restaurantName)
+      RETURN r.nombre AS nombreRestaurante
+      `,
+      { restaurantName: restaurantName }
+    );
+
+    const existingRestaurants = restaurantCheck.records.map(record => 
+      record.get('nombreRestaurante')
+    );
+
+    if (existingRestaurants.length === 0) {
+      console.warn(`No se encontró ningún restaurante con el nombre: ${restaurantName}`);
+      res.status(404).json({ 
+        error: "No se encontró ningún restaurante con este nombre",
+        debugInfo: "No matching restaurants found"
+      });
+      return;
+    }
+
+    console.log('Restaurantes encontrados:', existingRestaurants);
+
+    // Then, search for orders
+    const result = await session.run(
+      `
+      MATCH (r:Restaurant)
+      WHERE toLower(r.nombre) CONTAINS toLower($restaurantName)
+      WITH r
+      OPTIONAL MATCH (r)<-[:LOCATED_IN]-(i:Inventory)
+      OPTIONAL MATCH (i)<-[:DELIVERED_TO]-(o:Order)
+      RETURN 
+        o.id AS orderID, 
+        o.fechaOrden AS fecha, 
+        o.cantidad AS cantidad,
+        o.estado AS estado, 
+        o.costo_total AS total,
+        r.nombre AS restaurantFullName
+      `,
+      { restaurantName: restaurantName }
+    );
+
+    const orders = result.records
+      .filter(record => record.get("orderID"))
+      .map(record => ({
+        orderID: record.get("orderID"),
+        fecha: record.get("fecha")?.toString() || "Sin fecha",
+        cantidad: record.get("cantidad") || 0,
+        estado: record.get("estado") || "Desconocido",
+        costoTotal: record.get("total") || 0,
+        restaurante: record.get("restaurantFullName")
+      }));
+
+    if (orders.length === 0) {
+      console.warn(`No se encontraron órdenes para los restaurantes: ${existingRestaurants.join(', ')}`);
+      res.status(404).json({ 
+        error: "No se encontraron órdenes para este restaurante",
+        restaurantesEncontrados: existingRestaurants,
+        debugInfo: "Restaurants exist but have no orders"
+      });
+      return;
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error al obtener órdenes del restaurante:", error);
+    res.status(500).json({ error: "Error al obtener órdenes del restaurante" });
+  } finally {
+    await session.close();
+  }
+};
