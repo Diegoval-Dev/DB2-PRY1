@@ -168,3 +168,29 @@ export const updateSupplies = async (req: Request, res: Response) => {
       await session.close();
   }
 };
+
+export const updateSupplierProperty = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const { nombre, ubicación, calificación } = req.body 
+
+  const session = driver.session()
+
+  try {
+      const query = `
+          MATCH (s:Supplier {id: $id})
+          SET ${nombre ? 's.nombre = $nombre,' : ''}
+              ${ubicación ? 's.ubicación = $ubicación,' : ''}
+              ${calificación ? 's.calificación = toFloat($calificación),' : ''}
+          s._lastUpdated = datetime()
+      `
+
+      await session.run(query, { id, nombre, ubicación, calificación })
+
+      res.json({ message: "Propiedades actualizadas correctamente" })
+  } catch (error) {
+      console.error("Error actualizando supplier:", error)
+      res.status(500).json({ error: "Error actualizando supplier" })
+  } finally {
+      await session.close()
+  }
+}

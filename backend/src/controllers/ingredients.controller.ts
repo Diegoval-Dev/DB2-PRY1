@@ -1,5 +1,20 @@
 import { NextFunction, Request, Response } from "express";
 import { driver } from "../config/db";
+import { parse } from "csv-parse/sync"
+import fs from "fs"
+import path from "path"
+
+interface IngredientRecord {
+  id: string;
+  nombre: string;
+  categoria: string;
+  precio: string;
+  fechaCaducidad: string;
+  tipo: string;
+  categoryId: string;
+  inventoryId: string;
+  cantidad: string;
+}
 
 export const getAllIngredients = async (req: Request, res: Response) => {
   const session = driver.session()
@@ -169,3 +184,72 @@ export const deleteIngredient = async (req: Request, res: Response) => {
     await session.close();
   }
 };
+
+interface MulterRequest extends Request {
+  file: Express.Multer.File
+}
+
+export const bulkLoadIngredients = async (req: Request, res: Response) => {
+  const session = driver.session()
+
+  if (!req.file) {
+      res.status(400).json({ error: "No se recibió archivo CSV" })
+      return
+  }
+
+  const filePath = path.resolve(req.file.path)
+
+  try {
+      const csvData = fs.readFileSync(filePath, "utf-8") // ✅ Leemos el archivo físico
+
+      const records = parse(csvData, { columns: true, skip_empty_lines: true })
+
+      for (const record of records) {
+          const {
+              id,
+              nombre,
+              categoria,
+              precio,
+              fechaCaducidad,
+              tipo,
+              categoryId,
+              inventoryId,
+              cantidad
+          } = record
+
+          const tipos: string = tipo.split(",").map((t: string) => `\`${t.trim()}\``).join(":")
+
+          await session.run(`
+              MERGE (i:${tipos} {id: $id})
+              ON CREATE SET 
+                  i.nombre = $nombre,
+                  i.categoría = $categoria,
+                  i.precio = toFloat($precio),
+                  i.fecha_caducidad = date($fechaCaducidad)
+          `, { id, nombre, categoria, precio, fechaCaducidad })
+
+          await session.run(`
+              MATCH (i:Ingredient {id: $id})
+              MATCH (c:Category {id: $categoryId})
+              MERGE (i)-[:BELONGS_TO {categoria: c.nombre}]->(c)
+          `, { id, categoryId })
+
+          await session.run(`
+              MATCH (i:Ingredient {id: $id})
+              MATCH (inv:Inventory {id: $inventoryId})
+              MERGE (i)-[r:STORED_IN]->(inv)
+              ON CREATE SET r.cantidad = toInteger($cantidad)
+              ON MATCH SET r.cantidad = toInteger($cantidad)
+          `, { id, inventoryId, cantidad })
+      }
+
+      fs.unlinkSync(filePath)
+
+      res.json({ message: "Ingredientes cargados correctamente desde CSV" })
+  } catch (error) {
+      console.error("Error procesando archivo CSV:", error)
+      res.status(500).json({ error: "Error procesando archivo CSV" })
+  } finally {
+      await session.close()
+  }
+}
