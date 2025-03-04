@@ -4,17 +4,6 @@ import { parse } from "csv-parse/sync"
 import fs from "fs"
 import path from "path"
 
-interface IngredientRecord {
-  id: string;
-  nombre: string;
-  categoria: string;
-  precio: string;
-  fechaCaducidad: string;
-  tipo: string;
-  categoryId: string;
-  inventoryId: string;
-  cantidad: string;
-}
 
 export const getAllIngredients = async (req: Request, res: Response) => {
   const session = driver.session()
@@ -158,35 +147,70 @@ export const createIngredient = async (req: Request, res: Response) => {
 };
 
 export const updateIngredient = async (req: Request, res: Response) => {
-  const session = driver.session();
-  const { nombre, categoría, precio, cantidad, fechaCaducidad } = req.body;
+  const { id } = req.params
+  const { nombre, categoría, precio, cantidad, fechaCaducidad } = req.body
+
+  const session = driver.session()
+
   try {
-    await session.run(
-      `MATCH (i:Ingredient {ID: $id}) SET i.nombre = $nombre, i.categoría = $categoría, i.precio = $precio, i.cantidad = $cantidad, i.fechaCaducidad = date($fechaCaducidad) RETURN i`,
-      { id: req.params.id, nombre, categoría, precio, cantidad, fechaCaducidad }
-    );
-    res.json({ message: "Insumo actualizado" });
+      const query = `
+          MATCH (i:Ingredient {id: $id})
+          SET ${nombre !== undefined ? "i.nombre = $nombre," : ""}
+              ${categoría !== undefined ? "i.categoría = $categoría," : ""}
+              ${precio !== undefined ? "i.precio = toFloat($precio)," : ""}
+              ${cantidad !== undefined ? "i.cantidad_en_existencia = toInteger($cantidad)," : ""}
+              ${fechaCaducidad !== undefined ? "i.fecha_caducidad = date($fechaCaducidad)," : ""}
+              i._lastUpdated = datetime()
+      `
+      const cleanedQuery = query.replace(/,\s*$/g, "") // Quita la ultima coma en caso de que falte algo
+
+      const result = await session.run(cleanedQuery, {
+          id,
+          nombre,
+          categoría,
+          precio,
+          cantidad,
+          fechaCaducidad
+      })
+
+      if (result.summary.counters.updates().propertiesSet === 0) {
+          res.status(404).json({ error: "Insumo no encontrado o sin cambios aplicados" })
+          return
+      }
+
+      res.json({ message: "Insumo actualizado correctamente" })
   } catch (error) {
-    res.status(500).json({ error: "Error actualizando insumo" });
+      console.error("Error actualizando ingrediente:", error)
+      res.status(500).json({ error: "Error actualizando ingrediente" })
   } finally {
-    await session.close();
+      await session.close()
   }
-};
+}
 
 export const deleteIngredient = async (req: Request, res: Response) => {
-  const session = driver.session();
-  try {
-    await session.run(`MATCH (i:Ingredient {ID: $id}) DETACH DELETE i`, { id: req.params.id });
-    res.json({ message: "Insumo eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: "Error eliminando insumo" });
-  } finally {
-    await session.close();
-  }
-};
+  const { id } = req.params
+  const session = driver.session()
 
-interface MulterRequest extends Request {
-  file: Express.Multer.File
+  try {
+      const query = `
+          MATCH (i:Ingredient {id: $id})
+          DETACH DELETE i
+      `
+
+      const result = await session.run(query, { id })
+
+      if (result.summary.counters.updates().nodesDeleted === 0) {
+          res.status(404).json({ error: "Insumo no encontrado" })
+          return
+      }
+
+      res.json({ message: "Insumo eliminado correctamente" })
+  } catch (error) {
+      console.error("Error eliminando ingrediente:", error)
+      res.status(500).json({ error: "Error eliminando ingrediente" })
+  } finally {
+      await session.close()
+  }
 }
 
 export const bulkLoadIngredients = async (req: Request, res: Response) => {

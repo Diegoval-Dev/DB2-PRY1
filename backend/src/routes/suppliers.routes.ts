@@ -1,5 +1,13 @@
 import { Router } from "express";
-import { getAllSuppliers, getSupplierById, createSupplier, updateSupplier, deleteSupplier, updateSupplies } from "../controllers/suppliers.controller";
+import { 
+  getAllSuppliers, 
+  getSupplierById, 
+  createSupplier, 
+  updateSupplier, 
+  deleteSupplier, 
+  updateSupplies,
+  updateSupplierProperty
+} from "../controllers/suppliers.controller";
 
 const router = Router();
 
@@ -9,5 +17,6 @@ router.post("/", createSupplier);
 router.put("/:id", updateSupplier);
 router.put("/:id/supplies", updateSupplies);
 router.delete("/:id", deleteSupplier);
+router.patch("/:id", updateSupplierProperty)
 
 export default router;

@@ -42,20 +42,63 @@ export const getAllCategories = async (req: Request, res: Response) => {
     }
 }
 
-// Eliminar categoría
-export const deleteCategory = async (req: Request, res: Response) => {
-    const session = driver.session()
+export const updateCategory = async (req: Request, res: Response) => {
     const { id } = req.params
+    const { nombre, descripcion } = req.body
+
+    const session = driver.session()
 
     try {
-        await session.run(
-            `MATCH (c:Category {id: $id}) DETACH DELETE c`,
-            { id }
-        )
-        res.json({ message: "Categoría eliminada" })
+        const query = `
+            MATCH (c:Category {id: $id})
+            SET ${nombre !== undefined ? "c.nombre = $nombre," : ""}
+                ${descripcion !== undefined ? "c.descripcion = $descripcion," : ""}
+                c._lastUpdated = datetime()
+        `
+        const cleanedQuery = query.replace(/,\s*$/g, "")
+
+        const result = await session.run(cleanedQuery, {
+            id,
+            nombre,
+            descripcion
+        })
+
+        if (result.summary.counters.updates().propertiesSet === 0) {
+            res.status(404).json({ error: "Categoria no encontrada o sin cambios aplicados" })
+            return
+        }
+
+        res.json({ message: "Categoria actualizada correctamente" })
     } catch (error) {
-        console.error("Error eliminando categoría:", error)
-        res.status(500).json({ error: "Error eliminando categoría" })
+        console.error("Error actualizando categoria:", error)
+        res.status(500).json({ error: "Error actualizando categoria" })
+    } finally {
+        await session.close()
+    }
+}
+
+// Eliminar categoría
+export const deleteCategory = async (req: Request, res: Response) => {
+    const { id } = req.params
+    const session = driver.session()
+
+    try {
+        const query = `
+            MATCH (c:Category {id: $id})
+            DETACH DELETE c
+        `
+
+        const result = await session.run(query, { id })
+
+        if (result.summary.counters.updates().nodesDeleted === 0) {
+            res.status(404).json({ error: "Categoria no encontrada" })
+            return
+        }
+
+        res.json({ message: "Categoria eliminada correctamente" })
+    } catch (error) {
+        console.error("Error eliminando categoria:", error)
+        res.status(500).json({ error: "Error eliminando categoria" })
     } finally {
         await session.close()
     }

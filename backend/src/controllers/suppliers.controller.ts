@@ -99,18 +99,31 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteSupplier = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
+export const deleteSupplier = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const session = driver.session()
+
   try {
-    await session.run(`MATCH (s:Supplier {ID: $id}) DETACH DELETE s`, { id: req.params.id });
-    res.json({ message: "Proveedor eliminado" });
+      const query = `
+          MATCH (s:Supplier {id: $id})
+          DETACH DELETE s
+      `
+
+      const result = await session.run(query, { id })
+
+      if (result.summary.counters.updates().nodesDeleted === 0) {
+          res.status(404).json({ error: "Proveedor no encontrado" })
+          return
+      }
+
+      res.json({ message: "Proveedor eliminado correctamente" })
   } catch (error) {
-    console.error("Error eliminando proveedor:", error);
-    res.status(500).json({ error: "Error eliminando proveedor" });
+      console.error("Error eliminando supplier:", error)
+      res.status(500).json({ error: "Error eliminando supplier" })
   } finally {
-    await session.close();
+      await session.close()
   }
-};
+}
 
 export const updateSupplies = async (req: Request, res: Response) => {
   const session = driver.session();

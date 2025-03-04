@@ -97,15 +97,65 @@ export const createInventory = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const deleteInventory = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
+export const updateInventory = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const { descripcion, capacidad, cantidadInsumo } = req.body
+
+  const session = driver.session()
+
   try {
-    await session.run(`MATCH (inv:Inventory {ID: $id}) DETACH DELETE inv`, { id: req.params.id });
-    res.json({ message: "Inventario eliminado" });
+      const query = `
+          MATCH (inv:Inventory {id: $id})
+          SET ${descripcion !== undefined ? "inv.descripcion = $descripcion," : ""}
+              ${capacidad !== undefined ? "inv.capacidad = toFloat($capacidad)," : ""}
+              ${cantidadInsumo !== undefined ? "inv.cantidadInsumo = toInteger($cantidadInsumo)," : ""}
+              inv._lastUpdated = datetime()
+      `
+      const cleanedQuery = query.replace(/,\s*$/g, "") // Elimina coma final si aplica
+
+      const result = await session.run(cleanedQuery, {
+          id,
+          descripcion,
+          capacidad,
+          cantidadInsumo
+      })
+
+      if (result.summary.counters.updates().propertiesSet === 0) {
+          res.status(404).json({ error: "Inventario no encontrado o sin cambios aplicados" })
+          return
+      }
+
+      res.json({ message: "Inventario actualizado correctamente" })
   } catch (error) {
-    console.error("Error eliminando inventario:", error);
-    res.status(500).json({ error: "Error eliminando inventario" });
+      console.error("Error actualizando inventario:", error)
+      res.status(500).json({ error: "Error actualizando inventario" })
   } finally {
-    await session.close();
+      await session.close()
   }
-};
+}
+
+export const deleteInventory = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const session = driver.session()
+
+  try {
+      const query = `
+          MATCH (inv:Inventory {id: $id})
+          DETACH DELETE inv
+      `
+
+      const result = await session.run(query, { id })
+
+      if (result.summary.counters.updates().nodesDeleted === 0) {
+          res.status(404).json({ error: "Inventario no encontrado" })
+          return
+      }
+
+      res.json({ message: "Inventario eliminado correctamente" })
+  } catch (error) {
+      console.error("Error eliminando inventario:", error)
+      res.status(500).json({ error: "Error eliminando inventario" })
+  } finally {
+      await session.close()
+  }
+}

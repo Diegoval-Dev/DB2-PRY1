@@ -57,3 +57,64 @@ export const createLocation = async (req: Request, res: Response): Promise<void>
         await session.close();
     }
 };
+
+export const updateLocation = async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { nombre, tipoUbicacion } = req.body
+
+    const session = driver.session()
+
+    try {
+        const query = `
+            MATCH (loc:Location {id: $id})
+            SET ${nombre !== undefined ? "loc.nombre = $nombre," : ""}
+                ${tipoUbicacion !== undefined ? "loc.tipoUbicacion = $tipoUbicacion," : ""}
+                loc._lastUpdated = datetime()
+        `
+        const cleanedQuery = query.replace(/,\s*$/g, "")
+
+        const result = await session.run(cleanedQuery, {
+            id,
+            nombre,
+            tipoUbicacion
+        })
+
+        if (result.summary.counters.updates().propertiesSet === 0) {
+            res.status(404).json({ error: "Ubicacion no encontrada o sin cambios aplicados" })
+            return
+        }
+
+        res.json({ message: "Ubicacion actualizada correctamente" })
+    } catch (error) {
+        console.error("Error actualizando ubicacion:", error)
+        res.status(500).json({ error: "Error actualizando ubicacion" })
+    } finally {
+        await session.close()
+    }
+}
+
+export const deleteLocation = async (req: Request, res: Response) => {
+    const { id } = req.params
+    const session = driver.session()
+
+    try {
+        const query = `
+            MATCH (loc:Location {id: $id})
+            DETACH DELETE loc
+        `
+
+        const result = await session.run(query, { id })
+
+        if (result.summary.counters.updates().nodesDeleted === 0) {
+            res.status(404).json({ error: "Ubicacion no encontrada" })
+            return
+        }
+
+        res.json({ message: "Ubicacion eliminada correctamente" })
+    } catch (error) {
+        console.error("Error eliminando ubicacion:", error)
+        res.status(500).json({ error: "Error eliminando ubicacion" })
+    } finally {
+        await session.close()
+    }
+}
