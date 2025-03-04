@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { driver } from "../config/db";
-//no esta regresando los tipos completos
 export const getAllInventories = async (req: Request, res: Response): Promise<void> => {
   const session = driver.session()
 
@@ -62,30 +61,32 @@ export const createInventory = async (req: Request, res: Response): Promise<void
       const locationResult = await session.run(
           `MATCH (loc:Location {id: $ubicacion}) RETURN loc.nombre AS nombre`,
           { ubicacion }
-      )
+      );
 
       if (locationResult.records.length === 0) {
-          res.status(400).json({ error: "Ubicación no encontrada" })
-          return
+          res.status(400).json({ error: "Ubicación no encontrada" });
+          return;
       }
 
-      const nombreUbicacion = locationResult.records[0].get("nombre")
+      const nombreUbicacion = locationResult.records[0].get("nombre");
+
+      const labels: string = tipo.map((t: string) => `\`${t}\``).join(":");
 
       await session.run(
           `
-          CREATE (inv:Inventory {id: $id, capacidad: toFloat($capacidad), cantidad_insumos: toFloat($cantidadInsumo), tipo: $tipo, ubicación: $ubicacion})
+          CREATE (inv:${labels} {id: $id, capacidad: toFloat($capacidad), cantidadInsumo: toFloat($cantidadInsumo), ubicación: $ubicacion})
           `,
-          { id, capacidad, cantidadInsumo, tipo, ubicacion: nombreUbicacion }
-      )
+          { id, capacidad, cantidadInsumo, ubicacion: nombreUbicacion }
+      );
 
       await session.run(
           `
-          MATCH (inv:Inventory {id: $id})
+          MATCH (inv {id: $id})
           MATCH (loc:Location {id: $ubicacion})
           CREATE (inv)-[:LOCATED_IN {ciudad: loc.nombre}]->(loc)
           `,
           { id, ubicacion }
-      )
+      );
 
       res.json({ message: "Inventario creado" });
   } catch (error) {
@@ -93,25 +94,6 @@ export const createInventory = async (req: Request, res: Response): Promise<void
       res.status(500).json({ error: "Error creando inventario" });
   } finally {
       await session.close();
-  }
-};
-
-export const updateInventory = async (req: Request, res: Response): Promise<void> => {
-  const session = driver.session();
-  const { ubicación, capacidad, cantidadAlmacenada } = req.body;
-  try {
-    await session.run(
-      `MATCH (inv:Inventory {ID: $id}) 
-       SET inv.ubicación = $ubicación, inv.capacidad = $capacidad, inv.cantidadAlmacenada = $cantidadAlmacenada 
-       RETURN inv`,
-      { id: req.params.id, ubicación, capacidad, cantidadAlmacenada }
-    );
-    res.json({ message: "Inventario actualizado" });
-  } catch (error) {
-    console.error("Error actualizando inventario:", error);
-    res.status(500).json({ error: "Error actualizando inventario" });
-  } finally {
-    await session.close();
   }
 };
 
